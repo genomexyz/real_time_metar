@@ -1,0 +1,3459 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	
+	<title>Lapor Status ALOPTAMA</title>
+	
+	<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+	<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="static_peralatan/css/leaflet.css"/>
+    <script src="static_peralatan/js/leaflet.js"></script>
+    <link rel="stylesheet" href="static_peralatan/css/leaflet-sidebar.css" />
+    <script src="static_peralatan/js/leaflet-sidebar.js"></script>
+    <link href="static_peralatan/css/jquery-ui.css" rel="stylesheet">
+    <link href="static_peralatan/css/date.css" rel="stylesheet">
+
+    <script src="static_peralatan/js/jquery-1.12.4.js"></script>
+    <script src="static_peralatan/js/jquery-ui.js"></script>
+
+	<style>
+		html, body {
+			height: 100%;
+			margin: 0;
+            overflow-y: hidden;
+		}
+		.leaflet-container {
+			height: 400px;
+			width: 600px;
+			max-width: 100%;
+			max-height: 100%;
+		}
+
+          /** Modal */
+  .modal {
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+    position: absolute;
+    top: 10px;
+    left: 0;
+    right: 0;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 30px;
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+  }
+  .modal-close-btn {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    font-size: 20px;
+  }
+  
+  /** Overlay */
+  .overlay {
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.3);
+  }
+  
+  /** JS */
+  .is-visible {
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 90000;
+  }
+
+	</style>
+
+	<style>body { padding: 0; margin: 0; } #map { height: 100%; width: 100vw; }</style>
+
+    <!--start table in popup klik-->
+    <style>
+        #table_popup {
+          font-family: Arial, Helvetica, sans-serif;
+          border-collapse: collapse;
+          width: 100%;
+        }
+        
+        #table_popup td, #table_popup th {
+          border: 1px solid #ddd;
+          padding: 8px;
+        }
+        
+        #table_popup tr:nth-child(even){background-color: #D0B8A8;}
+        
+        #table_popup tr:hover {background-color: #DFD3C3;}
+        
+        #table_popup th {
+          padding-top: 12px;
+          padding-bottom: 12px;
+          text-align: left;
+          background-color: #7D6E83;
+          color: white;
+        }
+    </style>
+    <!--end table in popup klik-->
+</head>
+<body>
+
+<!-- optionally define the sidebar content via HTML markup -->
+<div id="sidebar" class="leaflet-sidebar collapsed">
+
+    <!-- nav tabs -->
+    <div class="leaflet-sidebar-tabs">
+        <!-- top aligned tabs -->
+        <ul role="tablist">
+            <li><a href="#home" role="tab"><i class="fa fa-gear"></i></a></li> <!-- fa fa-info-circle -->
+            <li><a href="#autopan" role="tab"><i class="fa fa-database"></i></a></li>
+            {{if .is_admin}}
+            <li><a href="#manage_site"><img src="static_peralatan/img/tent.svg"></a></li>
+            {{end}}
+            {{if .is_admin}}
+            <li><a href="#manage_user"><img src="static_peralatan/img/users.svg"></a></li>
+            {{end}}
+            <li><a href="logout"><img src="static_peralatan/img/log-out.svg"></a></li>
+        </ul>
+    </div>
+
+    <!-- panel content -->
+    <div class="leaflet-sidebar-content">
+        <div class="leaflet-sidebar-pane" id="home" style="overflow-x:scroll">
+            <h1 class="leaflet-sidebar-header">
+                Update
+                <span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span>
+            </h1>
+
+            <h2 id="nama_stasiun">Update Data Peralatan</h2>
+            <h3 id="nama_stasiun">Situs</h3>
+            <select name="situs" id="situs" onchange="update_set_alat_kompleks();">
+                {{range .all_situs}}
+                <option value="{{.Kode_situs}}">{{.Kode_situs}} - {{.Nama_situs}}</option>
+                {{end}}
+            </select>
+            <div id="list_opsi_alat_kompleks"></div>
+            <div id="list_opsi_alat"></div>
+            <div style="margin-top: 10px;" id="list_opsi_alat_tambahan">
+                <ul style="list-style-type: none;">
+                    <li style="margin: 5px;">
+                        <button style="background-color: #354259;" onclick="tambah_alat_spesifik('aws')">
+                            <img src="static_peralatan/img/aws.png" width="24" height="24"> <b>Tambahkan AWS</b>
+                        </button>
+                    </li>
+                    <li style="margin: 5px;">
+                        <button style="background-color: #354259;" onclick="tambah_alat_spesifik('lidar va')">
+                            <img src="static_peralatan/img/volcano.svg" width="24" height="24"> <b>Tambahkan Lidar VA</b>
+                        </button>
+                    </li>
+                    <li style="margin: 5px;">
+                        <button style="background-color: #354259;" onclick="tambah_alat_spesifik('lidar ws')">
+                            <img src="static_peralatan/img/flashlight.svg"> <b>Tambahkan Lidar WS</b>
+                        </button>
+                    </li>
+                    <li style="margin: 5px;">
+                        <button style="background-color: #354259;" onclick="tambah_alat_spesifik('radar ws')">
+                            <img src="static_peralatan/img/radio.svg"> <b>Tambahkan Radar WS</b>
+                        </button>
+                    </li>
+                    <li style="margin: 5px;">
+                        <button style="background-color: #354259;" onclick="tambah_alat_spesifik('wind profiler')">
+                            <img src="static_peralatan/img/wind.svg"> <b>Tambahkan Wind profiler</b>
+                        </button>
+                    </li>
+                    <li style="margin: 5px;">
+                        <button style="background-color: #354259;" onclick="tambah_alat_spesifik('rason')">
+                            <img src="static_peralatan/img/balloon.svg" width="24" height="24"> <b>Tambahkan Rason</b>
+                        </button>
+                    </li>
+                    <li style="margin: 5px;">
+                        <button style="background-color: #354259;" onclick="tambah_alat()">
+                            <img src="static_peralatan/img/plus-square.svg"> <b>Tambahkan Alat Lainnya</b>
+                        </button>
+                    </li>
+                </ul>
+                <div id="row_alat_tambahan">
+
+                </div>
+            </div>
+            <button style="margin-top: 10px;" id="update" onclick="update_to_db()" type="submit" class="btn btn-link text-primary">Update</button>
+            <h3 id="status_update"></h3>
+
+        </div>
+
+        <div class="leaflet-sidebar-pane" id="autopan">
+            <h1 class="leaflet-sidebar-header">
+                Extract Data
+                <span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span>
+            </h1>
+            {{if .is_admin}}
+            <div>
+                <h2><a href="get_awos_excel">Download</a> status AWOS terbaru</h2>
+            </div>
+            <!--<div>
+                <h2>Ekstrak Data Historis AWOS</h2>
+            </div>
+            <div> 
+                <p id="text">Pilih awal waktu</p> 
+                 <input class="form-control" type="text" id="datepicker_awal_waktu"> 
+            </div>
+            <div> 
+                <p id="text">Pilih akhir waktu</p> 
+                 <input class="form-control" type="text" id="datepicker_akhir_waktu"> 
+            </div>
+            <br>
+            <div>
+                <button id="button-addon1" type="submit" onclick="extract_data_historis_awos();" class="btn btn-link text-primary">Ekstrak</button>
+            </div>-->
+            <div>
+                <h2><a href="get_llwas_excel">Download</a> status LLWAS terbaru</h2>
+            </div>
+            <div>
+                <h2><a href="get_peralatan_excel">Download</a> status peralatan terbaru</h2>
+            </div>
+            <br>
+            {{else}}
+                <h1>ONLY FOR ADMIN</h1>
+            {{end}}
+        </div>
+
+        {{if .is_admin}}
+        <div class="leaflet-sidebar-pane" id="manage_user" style="overflow-x:scroll">
+            <h1 class="leaflet-sidebar-header">
+                Manage User
+                <span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span>
+            </h1>
+
+            <h2 id="list_situs">List User</h2>
+            <div style="margin-top: 10px;" id="list_opsi_alat_tambahan">
+                <button style="background-color: #354259;" onclick="tambah_user()">
+                    <img src="static_peralatan/img/plus-square.svg"> <b>Tambah User</b>
+                </button>
+                <div>
+                    {{range .all_user}}
+                        <div>
+                            <div style="display: inline-block;">
+                                <table style="border: 2px solid black; margin: 5px;">
+                                    <tr>
+                                        <td>username</td>
+                                        <td>:</td>
+                                        <td>{{.Username}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>display name</td>
+                                        <td>:</td>
+                                        <td>{{.Kode_user}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>password</td>
+                                        <td>:</td>
+                                        <td>{{.Password}}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div style="display: inline-block;">
+                                <div style="margin-bottom: 3px;"><button onclick="edit_user('{{.Username}}')">Edit</button></div>
+                                <div style="margin-bottom: 3px;"><button onclick="hapus_user('{{.Username}}')">Hapus</button></div>
+                            </div>
+                        </div>
+                    {{end}}
+                </div>
+            </div>
+            <button style="margin-top: 10px;" id="update" onclick="update_to_db()" type="submit" class="btn btn-link text-primary">Update</button>
+            <h3 id="status_update"></h3>
+
+        </div>
+        {{end}}
+
+        {{if .is_admin}}
+        <div class="leaflet-sidebar-pane" id="manage_site" style="overflow-x:scroll">
+            <h1 class="leaflet-sidebar-header">
+                Manage Site
+                <span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span>
+            </h1>
+
+            <h2 id="list_situs">List Situs</h2>
+            <div style="margin-top: 10px;" id="list_opsi_alat_tambahan">
+                <button style="background-color: #354259;" onclick="tambah_situs()">
+                    <img src="static_peralatan/img/plus-square.svg"> <b>Tambah Situs</b>
+                </button>
+                <div id="row_situs_tambahan">
+
+                </div>
+            </div>
+            {{range .all_situs}}
+                <div>
+                    <div style="display: inline-block">
+                        {{if .Foto}}
+                        <img src="static_peralatan/img_situs/{{.Foto}}" width="70px" height="70px" >
+                        {{else}}
+                        <img src="static_peralatan/img/no_photo.png" width="70px" height="70px">
+                        {{end}}
+                        
+                    </div>
+                    <div style="display: inline-block; border: 1px solid black;">
+                        <div>{{.Kode_situs}}</div>
+                        <div>{{.Nama_situs}}</div>
+                        <div>Balai: {{.Balai}}</div>
+                    </div>
+                    <div style="display: inline-block;">
+                        <div><button onclick="edit_situs('{{.Kode_situs}}')">Edit</button></div>
+                        <div><button onclick="hapus_situs('{{.Kode_situs}}')">Hapus</button></div>
+                    </div>
+                </div>
+            {{end}}
+            <button style="margin-top: 10px;" id="update" onclick="update_to_db()" type="submit" class="btn btn-link text-primary">Update</button>
+            <h3 id="status_update"></h3>
+
+        </div>
+        {{end}}
+
+        <div class="leaflet-sidebar-pane" id="messages">
+            <h1 class="leaflet-sidebar-header">Messages<span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
+        </div>
+    </div>
+</div>
+
+<div id='map'></div>
+
+<div id="daftar_alat" style="visibility:hidden;display:inline;">{{range .all_jenis_alat}}{{.Kode_alat}},{{end}}</div>
+<div id="nama_alat" style="visibility:hidden;display:inline;">{{range .all_jenis_alat}}{{.Nama_alat}},{{end}}</div>
+<div id="detail_alat_kompleks" style="visibility:hidden;display:inline;">{{.data_alat_kompleks}}</div>
+<div id="detail_alat" style="visibility:hidden;display:inline;">{{.data_alat}}</div>
+<div id="daftar_detail_situs" style="visibility:hidden;display:inline;">{{range .all_situs}}{{.Kode_situs}}***{{.Nama_situs}}|||{{end}}</div>
+
+<div class="overlay" id="overlay"></div>
+<div class="modal" id="modal" style="overflow-y: scroll; height: 75%;">
+  <button class="modal-close-btn" id="close-btn"><i class="fa fa-times" title="close"></i></button>
+  <div id="modal_status_alat">
+    <h3 id="stasiun_popup" style="text-align: center;">Judul</h3>
+    <div id="konten_metadata_situs">
+        <div style="width: 100%; border: 1px solid black;">
+            <img style="margin-left: auto;margin-right: auto; display: block; max-height:500px;max-width:500px;height:auto;width:auto;" id="metadata_foto_situs" src="static_peralatan/img/no_photo.png" >
+            <table>
+                <tr>
+                    <td>Balai</td>
+                    <td id="metadata_balai_situs">I</td>
+                </tr>
+                <tr>
+                    <td>Lintang</td>
+                    <td id="metadata_lintang_situs">I</td>
+                </tr>
+                <tr>
+                    <td>Bujur</td>
+                    <td id="metadata_bujur_situs">I</td>
+                </tr>
+                <tr>
+                    <td>Keterangan</td>
+                    <td id="metadata_keterangan_situs">I</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <a id="a_link_excel_metadata"><button>Download metadata situs</button></a><br><br>
+    <a id="a_link_excel_awos"><button>Download sebagai file excel</button></a><br><br>
+    <a id="a_link_excel_historis_peralatan"><button>Download data kondisi historis</button></a><br><br>
+    <button id="a_send_excel_awos">Kirim lapbul</button>
+    <p id="msg_kirim"></p>
+    <table id="table_popup">
+        <tr>
+            <th rowspan="2">Nama Alat</th>
+            <th rowspan="2">Merk/Type</th>
+            <th rowspan="2">Jumlah</th>
+            <th rowspan="2">Tahun Pengadaan</th>
+            <th rowspan="2">Tahun Kalibrasi</th>
+            <th colspan="3">Kondisi</th>
+            <th rowspan="2">Keterangan</th>
+        </tr>
+        <tr>
+            <th>Baik</th>
+            <th>Rusak</th>
+            <th>Rusak Berat</th>
+        </tr>
+        <tbody id="konten_popup">
+
+        </tbody>
+    </table>
+    <div style="margin-top: 5px;" id="info_latest_time_modal"></div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay_manage_situs"></div>
+<div class="modal" id="modal_manage_situs" style="overflow-y: scroll; height: 75%;">
+    <button class="modal-close-btn" id="close-btn_manage_situs"><i class="fa fa-times" title="close"></i></button>
+    <div id="modal_manage_situs_isi">
+        <div style="display: inline-block;">
+            <img width="450" height="450" id="modal_preview_foto_situs">
+        </div>
+        <div style="display: inline-block;">
+            <form action="create_situs" method="POST" enctype="multipart/form-data">
+                <label for="kode_situs_modal">Kode Situs:</label><br>
+                <input type="text" id="kode_situs_modal" name="kode_situs_modal"><br>
+                <label for="nama_situs_modal">Nama Situs:</label><br>
+                <input type="text" id="nama_situs_modal" name="nama_situs_modal"><br>
+                <label for="manager_situs_modal">User Manager Situs:</label><br>
+                <input type="text" id="manager_situs_modal" name="manager_situs_modal"><br>
+                <label for="balai_situs_modal">Balai:</label><br>
+                <select name="balai_situs_modal" id="balai_situs_modal">
+                    <option value="1">I</option>
+                    <option value="2">II</option>
+                    <option value="3">III</option>
+                    <option value="4">IV</option>
+                    <option value="5">V</option>
+                </select><br>
+                <label for="lintang_situs_modal">Lintang:</label><br>
+                <input type="number" id="lintang_situs_modal" step="0.000000000000001" name="lintang_situs_modal"><br>
+                <label for="bujur_situs_modal">Bujur:</label><br>
+                <input type="number" id="bujur_situs_modal" step="0.000000000000001" name="bujur_situs_modal"><br>
+                <label for="keterangan_situs_modal">Keterangan:</label><br>
+                <textarea id="keterangan_situs_modal" name="keterangan_situs_modal"></textarea><br>
+                <label for="foto_situs_modal">Foto profil:</label><br>
+                <input type="file" id="foto_situs_modal" name="foto_situs_modal" onchange="load_foto_situs(event)"><br><br>
+                <label for="metadata_situs_modal">Metadata stasiun (template metadata <a href="static_peralatan/template/metadataform.xls">download disini</a>):</label><br>
+                <input type="file" id="metadata_situs_modal" name="metadata_situs_modal"><br><br>
+                <input type="submit">
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="overlay" id="overlay_manage_user"></div>
+<div class="modal" id="modal_manage_user" style="overflow-y: scroll; height: 30%;">
+    <button class="modal-close-btn" id="close-btn_manage_user"><i class="fa fa-times" title="close"></i></button>
+    <div id="modal_manage_user_isi">
+        <div style="display: inline-block;">
+            <form action="create_user" method="POST">
+                <label for="username_user_modal">Username:</label><br>
+                <input type="text" id="username_user_modal" name="username_user_modal"><br>
+                <label for="displayname_user_modal">Display Name:</label><br>
+                <input type="text" id="displayname_user_modal" name="displayname_user_modal"><br>
+                <label for="password_user_modal">Password:</label><br>
+                <input type="text" id="password_user_modal" name="password_user_modal"><br>
+                <input type="submit">
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="overlay" id="overlay_edit_user"></div>
+<div class="modal" id="modal_edit_user" style="overflow-y: scroll; height: 30%;">
+    <button class="modal-close-btn" id="close-btn_edit_user"><i class="fa fa-times" title="close"></i></button>
+    <div id="modal_edit_user_isi">
+        <div style="display: inline-block;">
+            <form action="edit_user" method="POST">
+                <label for="username_user_modal_edit">Username:</label><br>
+                <input type="text" id="username_user_modal_edit" name="username_user_modal_edit"><br>
+                <label for="displayname_user_modal_edit">Display Name:</label><br>
+                <input type="text" id="displayname_user_modal_edit" name="displayname_user_modal_edit"><br>
+                <label for="password_user_modal_edit">Password:</label><br>
+                <input type="text" id="password_user_modal_edit" name="password_user_modal_edit"><br>
+                <input type="submit">
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!--start edit situs-->
+<div class="overlay" id="overlay_edit_situs"></div>
+<div class="modal" id="modal_edit_situs" style="overflow-y: scroll; height: 75%;">
+    <button class="modal-close-btn" id="close-btn_edit_situs"><i class="fa fa-times" title="close"></i></button>
+    <div id="modal_edit_situs_isi">
+        <div style="display: inline-block;">
+            <img width="450" height="450" id="modal_preview_foto_situs_edit">
+        </div>
+        <div style="display: inline-block;">
+            <form action="edit_situs" method="POST" enctype="multipart/form-data">
+                <label for="kode_situs_modal_edit">Kode Situs:</label><br>
+                <input type="text" id="kode_situs_modal_edit" name="kode_situs_modal_edit" readonly><br>
+                <label for="nama_situs_modal_edit">Nama Situs:</label><br>
+                <input type="text" id="nama_situs_modal_edit" name="nama_situs_modal_edit"><br>
+                <label for="manager_situs_modal_edit">User Manager Situs:</label><br>
+                <input type="text" id="manager_situs_modal_edit" name="manager_situs_modal_edit"><br>
+                <label for="balai_situs_modal_edit">Balai:</label><br>
+                <select name="balai_situs_modal_edit" id="balai_situs_modal_edit">
+                    <option value="1">I</option>
+                    <option value="2">II</option>
+                    <option value="3">III</option>
+                    <option value="4">IV</option>
+                    <option value="5">V</option>
+                </select><br>
+                <label for="lintang_situs_modal_edit">Lintang:</label><br>
+                <input type="number" id="lintang_situs_modal_edit" step="0.000000000000001" name="lintang_situs_modal_edit"><br>
+                <label for="bujur_situs_modal_edit">Bujur:</label><br>
+                <input type="number" id="bujur_situs_modal_edit" step="0.000000000000001" name="bujur_situs_modal_edit"><br>
+                <label for="keterangan_situs_modal_edit">Keterangan:</label><br>
+                <textarea id="keterangan_situs_modal_edit" name="keterangan_situs_modal_edit"></textarea><br>
+                <label for="foto_situs_modal_edit">Foto profil:</label><br>
+                <input type="file" id="foto_situs_modal_edit" name="foto_situs_modal_edit" onchange="load_foto_situs(event)"><br><br>
+                <label for="metadata_situs_modal">Metadata stasiun (template metadata <a href="static_peralatan/template/metadataform.xls">download disini</a>):</label><br>
+                <input type="file" id="metadata_situs_modal_edit" name="metadata_situs_modal_edit"><br><br>
+                <p>metadata terupload <a id="link_current_metadata">cek disini</a></p><br>
+                <input type="submit">
+            </form>
+        </div>
+    </div>
+</div>
+<!--end edit situs-->
+
+<!--START GET DICT KODE SITUS - NAMA-->
+<!--<script>
+    function get_global_situs() {
+        let all_data_situs = document.getElementById("daftar_detail_situs").innerHTML
+        console.log(all_data_situs)
+    }
+</script>-->
+<!--END GET DICT KODE SITUS - NAMA-->
+
+<!--START FOR MANAGE SITUS-->
+<script>
+
+    var load_foto_situs = function(event) {
+        var output = document.getElementById('modal_preview_foto_situs');
+        output.src = URL.createObjectURL(event.target.files[0]);
+        output.onload = function() {
+            URL.revokeObjectURL(output.src) // free memory
+        }
+    }
+
+    function hapus_situs(kode_situs) {
+        if (confirm("Yakin ingin menghapus situs "+kode_situs+"?") == true) {
+            var xhr = new XMLHttpRequest()
+            xhr.open("POST", 'hapus_situs', true)
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+            xhr.send(JSON.stringify({
+                'kode_situs': kode_situs
+            }))
+            location.reload()
+        }
+
+    }
+
+    function edit_situs(kode_situs) {
+        document.getElementById('overlay_edit_situs').classList.add('is-visible')
+        document.getElementById('modal_edit_situs').classList.add('is-visible')
+
+        var xhttp = new XMLHttpRequest();
+	    xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                var alldata_json
+                var alldata = this.responseText
+                try {
+                    alldata_json = JSON.parse(alldata)
+                } catch (err) {
+                    return
+                }
+                console.log('cek data json', alldata_json)
+                document.getElementById("kode_situs_modal_edit").value = alldata_json["Kode_situs"]
+                document.getElementById("nama_situs_modal_edit").value = alldata_json["Nama_situs"]
+
+                //get user manager
+                let all_user_manager = alldata_json["Editor"]
+                let user_manager_asli = all_user_manager[all_user_manager.length - 1]
+                document.getElementById("manager_situs_modal_edit").value = user_manager_asli
+
+                document.getElementById("balai_situs_modal_edit").value = alldata_json["Balai"]
+
+                document.getElementById("lintang_situs_modal_edit").value = parseFloat(alldata_json["Lintang"])
+                document.getElementById("bujur_situs_modal_edit").value = parseFloat(alldata_json["Bujur"])
+
+                document.getElementById("keterangan_situs_modal_edit").innerHTML = alldata_json["Keterangan"]
+                if (alldata_json["Metadata"] != "") {
+                    document.getElementById("link_current_metadata").href = "static_peralatan/metadata/"+alldata_json["Metadata"]
+                }
+                
+                //get photo
+                var foto_stasiun = alldata_json["Foto"]
+                if (foto_stasiun !== "") {
+                    document.getElementById("modal_preview_foto_situs_edit").src = 'static_peralatan/img_situs/'+foto_stasiun
+                }
+            }
+        }
+        xhttp.open("GET", `get_data_situs/${kode_situs}`, true);
+        xhttp.send();
+    }
+
+    function hapus_user(username) {
+        if (confirm("Yakin ingin menghapus user "+username+"?") == true) {
+            var xhr = new XMLHttpRequest()
+            xhr.open("POST", 'hapus_user', true)
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+            xhr.send(JSON.stringify({
+                'username': username
+            }))
+            location.reload()
+        }
+
+    }
+
+    function edit_user(kode_user) {
+        document.getElementById('overlay_edit_user').classList.add('is-visible')
+        document.getElementById('modal_edit_user').classList.add('is-visible')
+        var xhttp = new XMLHttpRequest();
+	    xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                var alldata_json
+                var alldata = this.responseText
+                try {
+                    alldata_json = JSON.parse(alldata)
+                } catch (err) {
+                    return
+                }
+                document.getElementById("username_user_modal_edit").value = alldata_json["Username"]
+                document.getElementById("username_user_modal_edit").readOnly = true
+                document.getElementById("displayname_user_modal_edit").value = alldata_json["Kode_user"]
+                document.getElementById("password_user_modal_edit").value = alldata_json["Password"]
+            }
+        }
+        xhttp.open("GET", `get_data_user/${kode_user}`, true);
+        xhttp.send()
+    }
+
+    function tambah_situs() {
+        document.getElementById('overlay_manage_situs').classList.add('is-visible')
+        document.getElementById('modal_manage_situs').classList.add('is-visible')
+    }
+
+    function tambah_user() {
+        document.getElementById('overlay_manage_user').classList.add('is-visible')
+        document.getElementById('modal_manage_user').classList.add('is-visible')
+    }
+</script>
+<!--END FOR MANAGE SITUS-->
+
+<!--START POPUP KONTEN-->
+<script>
+
+    function send_lapbul(stasiun) {
+        var div_target = document.getElementById("msg_kirim")
+        div_target.innerHTML = ""
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                var alldata_json
+                var alldata = this.responseText
+
+                //console.log(`cek data site ${kode}`, alldata)
+                try {
+                    alldata_json = JSON.parse(alldata)
+                } catch (err) {
+                    div_target.innerHTML = "Lapbul gagal dikirim, alasan: "+alldata_json["msg"]
+                    div_target.style.color = "red"
+                    return
+                }
+
+                if (alldata_json["status"] == "ok") {
+                    div_target.innerHTML = "Lapbul berhasil dikirim"
+                    div_target.style.color = "black"
+                    return
+                } else {
+                    div_target.innerHTML = "Lapbul gagal dikirim, alasan: "+alldata_json["msg"]
+                    div_target.style.color = "red"
+                    return
+                }
+            }
+        }
+        xhttp.open("GET", `send_lapbul/${stasiun}`, true);
+        xhttp.send();
+    }
+
+    function click_site() {
+        var kode_to_nama = {}
+        kode_to_nama['AWOS'] = 'AWOS'
+        kode_to_nama['radar'] = 'Radar'
+        kode_to_nama['LLWAS'] = 'LLWAS'
+
+        var kode = this.options.kode_situs
+
+        var a_link_histori = document.getElementById("a_link_excel_metadata")
+        a_link_histori.href = "get_metadata/"+kode
+        
+        var a_link_download = document.getElementById("a_link_excel_awos")
+        a_link_download.href = "get_lapbul/"+kode
+
+        var a_link_histori = document.getElementById("a_link_excel_historis_peralatan")
+        a_link_histori.href = "get_histori/"+kode
+
+        var btn_send_lapbul = document.getElementById("a_send_excel_awos")
+        btn_send_lapbul.setAttribute("onClick", `send_lapbul("${kode}")`)
+
+        var xhttp = new XMLHttpRequest()
+        xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                var alldata_json
+                var alldata = this.responseText
+
+                //console.log(`cek data site ${kode}`, alldata)
+                try {
+                    alldata_json = JSON.parse(alldata)
+                } catch (err) {
+                    //act for null data
+                    return
+                }
+
+                /*if (alldata_json['status'] != "ok") {
+                    //act for null data
+                    return
+                }*/
+
+                var alat_utama_detail = alldata_json['stat_alat']
+                var alat_utama_key = Object.keys(alat_utama_detail)
+
+                //get index urutan
+                var data_utama = alldata_json['data']
+                if (data_utama == null) {
+                    data_utama = []
+                }
+
+                //cek waktu
+                if (data_utama.length > 0) {
+                    let waktu_update = data_utama[0]['Insert_time']
+                    document.getElementById("info_latest_time_modal").innerHTML = `<b>latest update at ${waktu_update}</b>`
+                }
+
+                var idx_dict_loc = {}
+                for (var iter_key = 0; iter_key < alat_utama_key.length; iter_key++) {
+                    idx_dict_loc[alat_utama_key[iter_key]] = {}                    
+                }
+                for (var iter_alat = 0; iter_alat < data_utama.length; iter_alat++) {
+                    var kodea = data_utama[iter_alat]['Kode_alat']
+                    var urutan = data_utama[iter_alat]['Urutan']
+                    idx_dict_loc[kodea][urutan] = iter_alat
+                }
+
+
+                //document.getElementById("stasiun_popup").innerHTML = kode
+                fill_metadata_situs(kode)
+                var tbody = document.getElementById('konten_popup')
+                tbody.innerHTML = ''
+                for (var iter_alat = 0; iter_alat < alat_utama_key.length; iter_alat++) {
+                    for (var iter_cnt = 0; iter_cnt < alat_utama_detail[alat_utama_key[iter_alat]]; iter_cnt++) {
+                        var idx = idx_dict_loc[alat_utama_key[iter_alat]][iter_cnt]
+                        console.log('get idx', idx, alat_utama_detail[alat_utama_key[iter_alat]], iter_alat)
+                        var tahun_pengadaan = data_utama[idx]['Tahun_pengadaan']
+                        var tahun_kalibrasi = data_utama[idx]['Tahun_kalibrasi']
+                        var ket = data_utama[idx]['Keterangan']
+                        var merk_utama = data_utama[idx]['Merk']
+                        var list_sensor = data_utama[idx]['Performa_list']
+                        var jumlah_sensor = data_utama[idx]['Jumlah_site']
+                        var kategori_alat = data_utama[idx]['Kategori']
+
+                        var tr = document.createElement("tr")
+                        var td = document.createElement("td")
+                        //td.colSpan = 10
+                        if (iter_cnt > 0) {
+                            if (alat_utama_key[iter_alat] == "AWOS") {
+                                td.innerHTML = `<b>${kode_to_nama[alat_utama_key[iter_alat]]} kategori ${kategori_alat} (${iter_cnt+1})</b>`
+                            } else {
+                                td.innerHTML = `<b>${kode_to_nama[alat_utama_key[iter_alat]]} (${iter_cnt+1})</b>`
+                            }
+                        } else {
+                            if (alat_utama_key[iter_alat] == "AWOS") {
+                                td.innerHTML = `<b>${kode_to_nama[alat_utama_key[iter_alat]]} kategori ${kategori_alat}</b>`
+                            } else {
+                                td.innerHTML = `<b>${kode_to_nama[alat_utama_key[iter_alat]]}</b>`
+                            }
+                        }
+                        tr.appendChild(td)
+
+                        var td = document.createElement("td")
+                        td.innerHTML = merk_utama
+                        tr.appendChild(td)
+
+                        var td = document.createElement("td")
+                        td.innerHTML = 1
+                        tr.appendChild(td)
+
+                        var td = document.createElement("td")
+                        td.innerHTML = tahun_pengadaan
+                        tr.appendChild(td)
+
+                        var td = document.createElement("td")
+                        td.innerHTML = tahun_kalibrasi
+                        tr.appendChild(td)
+
+                        var td = document.createElement("td")
+                        td.colSpan = 3
+                        td.innerHTML = ''
+                        tr.appendChild(td)
+
+                        var td = document.createElement("td")
+                        td.rowSpan = list_sensor.length+1
+                        td.innerHTML = ket
+                        tr.appendChild(td)
+
+                        tbody.appendChild(tr)
+
+                        for (var iter_sensor = 0; iter_sensor < list_sensor.length; iter_sensor++) {
+                            var nama_sensor = list_sensor[iter_sensor]['Nama_alat']
+
+                            var tr = document.createElement("tr")
+                            var td = document.createElement("td")
+                            td.innerHTML = nama_sensor
+                            tr.appendChild(td)
+                            var jumlah_pasti_sensor = 0
+                            var jumlah_b_sensor = 0
+                            var jumlah_r_sensor = 0
+                            var jumlah_rb_sensor = 0
+                            for (var iter_site = 0; iter_site < jumlah_sensor; iter_site++) {
+                                try {
+                                    var stat_sensor = list_sensor[iter_sensor]['Keadaan'][iter_site]
+                                } catch (err) {
+                                    continue
+                                }
+                                if (stat_sensor == 'b') {
+                                    jumlah_b_sensor++
+                                } else if (stat_sensor == 'r') {
+                                    jumlah_r_sensor++
+                                } else if (stat_sensor == 'rb') {
+                                    jumlah_rb_sensor++
+                                } else {
+                                    continue
+                                }
+                                jumlah_pasti_sensor++
+                            }
+                            var td = document.createElement("td")
+                            td.innerHTML = ''
+                            tr.appendChild(td)
+
+                            var td = document.createElement("td")
+                            td.innerHTML = jumlah_pasti_sensor
+                            tr.appendChild(td)
+
+                            var td = document.createElement("td")
+                            td.innerHTML = ''
+                            tr.appendChild(td)
+
+                            var td = document.createElement("td")
+                            td.innerHTML = ''
+                            tr.appendChild(td)
+
+                            var td = document.createElement("td")
+                            td.innerHTML = jumlah_b_sensor
+                            tr.appendChild(td)
+
+                            var td = document.createElement("td")
+                            td.innerHTML = jumlah_r_sensor
+                            tr.appendChild(td)
+
+                            var td = document.createElement("td")
+                            td.innerHTML = jumlah_rb_sensor
+                            tr.appendChild(td)
+
+                            tbody.appendChild(tr)
+                        }
+                        tbody.appendChild(tr)
+                    }
+                }
+                //for alat tambahan
+                var tr = document.createElement("tr")
+                var td = document.createElement("td")
+                td.colSpan = 9
+                td.innerHTML = `<b>Alat tambahan</b>`
+                tr.appendChild(td)
+                tbody.appendChild(tr)
+
+                var data_tambahan = alldata_json['data_tambahan']
+                if (data_tambahan == null) {
+                    document.getElementById('overlay').classList.add('is-visible')
+                    document.getElementById('modal').classList.add('is-visible')
+                    return
+                }
+
+                //cek waktu
+                if (data_tambahan.length > 0) {
+                    let waktu_update = data_tambahan[0]['Insert_time']
+                    document.getElementById("info_latest_time_modal").innerHTML = `<b>latest update at ${waktu_update}</b>`
+                }
+
+                for (var iter_tambahan = 0; iter_tambahan < data_tambahan.length; iter_tambahan++) {
+                    var tr = document.createElement("tr")
+                    var nama_alat = data_tambahan[iter_tambahan]['Nama_alat']
+                    var jumlah = data_tambahan[iter_tambahan]['Jumlah']
+
+                    var string_merk = ''
+                    var array_tahunpengadaan = []
+                    var array_tahunkalibrasi = []
+                    var string_ket = ''
+                    var jumlah_b = 0
+                    var jumlah_r = 0
+                    var jumlah_rb = 0
+                    for (var iter_prop = 0; iter_prop < jumlah; iter_prop++) {
+                        try {
+                            var single_merk = data_tambahan[iter_tambahan]['Merk'][iter_prop]
+                        } catch (err) {
+                            var single_merk = ''
+                        }
+                        try {
+                            var single_keadaan = data_tambahan[iter_tambahan]['Keadaan'][iter_prop]
+                        } catch (err) {
+                            var single_keadaan = 'b'
+                        }
+                        try {
+                            array_tahunpengadaan.push(data_tambahan[iter_tambahan]['Tahun_pengadaan'][iter_prop])
+                        } catch (err) {
+                            array_tahunpengadaan.push('-')
+                        }
+                        try {
+                            array_tahunkalibrasi.push(data_tambahan[iter_tambahan]['Tahun_kalibrasi'][iter_prop])
+                        } catch (err) {
+                            array_tahunkalibrasi.push('-')
+                        }
+                        try {
+                            var single_keterangan = data_tambahan[iter_tambahan]['Keterangan'][iter_prop]
+                        } catch (err) {
+                            var single_keterangan = '-'
+                        }
+
+                        if (single_keadaan == 'b') {
+                            jumlah_b++
+                        } else if (single_keadaan == 'r') {
+                            jumlah_r++
+                        } else if (single_keadaan == 'rb') {
+                            jumlah_rb++
+                        } else {
+                            jumlah--
+                        }
+
+                        if (string_merk == '') {
+                            string_merk += single_merk
+                        } else {
+                            string_merk += `,${single_merk}`
+                        }
+
+                        if (string_ket == '') {
+                            string_ket += single_keterangan
+                        } else {
+                            string_ket += ` *** ${single_keterangan}`
+                        }
+                    }
+
+                    var unique_tahunpengadaan = array_tahunpengadaan.filter((v, i, a) => a.indexOf(v) == i)
+                    var unique_tahunkalibrasi = array_tahunkalibrasi.filter((v, i, a) => a.indexOf(v) == i)
+
+                    var string_tahunpengadaan = ''
+                    for (var iter_unique = 0; iter_unique < unique_tahunpengadaan.length; iter_unique++) {
+                        if (iter_unique == 0) {
+                            string_tahunpengadaan += unique_tahunpengadaan[iter_unique]
+                        } else {
+                            string_tahunpengadaan += `,${unique_tahunpengadaan[iter_unique]}`
+                        }
+                    }
+
+                    var string_tahunkalibrasi = ''
+                    for (var iter_unique = 0; iter_unique < unique_tahunkalibrasi.length; iter_unique++) {
+                        if (iter_unique == 0) {
+                            string_tahunkalibrasi += unique_tahunkalibrasi[iter_unique]
+                        } else {
+                            string_tahunkalibrasi += `,${unique_tahunkalibrasi[iter_unique]}`
+                        }
+                    }
+
+                    var td = document.createElement("td")
+                    td.innerHTML = nama_alat
+                    tr.appendChild(td)
+
+                    var td = document.createElement("td")
+                    td.innerHTML = string_merk
+                    tr.appendChild(td)
+
+                    var td = document.createElement("td")
+                    td.innerHTML = jumlah
+                    tr.appendChild(td)
+
+                    var td = document.createElement("td")
+                    td.innerHTML = string_tahunpengadaan
+                    tr.appendChild(td)
+
+                    var td = document.createElement("td")
+                    td.innerHTML = string_tahunkalibrasi
+                    tr.appendChild(td)
+
+                    var td = document.createElement("td")
+                    td.innerHTML = jumlah_b
+                    tr.appendChild(td)
+
+                    var td = document.createElement("td")
+                    td.innerHTML = jumlah_r
+                    tr.appendChild(td)
+
+                    var td = document.createElement("td")
+                    td.innerHTML = jumlah_rb
+                    tr.appendChild(td)
+
+                    var td = document.createElement("td")
+                    td.innerHTML = string_ket
+                    tr.appendChild(td)
+
+                    tbody.appendChild(tr)
+                }
+
+
+                //tbody.appendChild(tr)
+                document.getElementById('overlay').classList.add('is-visible')
+                document.getElementById('modal').classList.add('is-visible')
+
+            }
+        }
+        xhttp.open("GET", `get_data_alat/${kode}`, true);
+        xhttp.send();
+    }
+
+    function fill_metadata_situs(kode_stasiun) {
+        document.getElementById("metadata_foto_situs").src = "static_peralatan/img/no_photo.png"
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                let alldata_json
+                let alldata = this.responseText
+                try {
+                    alldata_json = JSON.parse(alldata)
+                } catch (err) {
+                    //act for null data
+                    return
+                }
+                //let div_metadata_situs = document.getElementById("konten_metadata_situs")
+                //div_metadata_situs.innerHTML = ""
+                let nama_display_situs = kode_stasiun+' - '+alldata_json['Nama_situs']
+                document.getElementById("stasiun_popup").innerHTML = nama_display_situs
+
+                if (alldata_json["Foto"] !== "") {
+                    document.getElementById("metadata_foto_situs").src = "static_peralatan/img_situs/"+alldata_json["Foto"]
+                }
+
+                if (alldata_json["Balai"] == 1) {
+                    document.getElementById("metadata_balai_situs").innerHTML = "I"
+                } else if (alldata_json["Balai"] == 2) {
+                    document.getElementById("metadata_balai_situs").innerHTML = "II"
+                } else if (alldata_json["Balai"] == 3) {
+                    document.getElementById("metadata_balai_situs").innerHTML = "III"
+                } else if (alldata_json["Balai"] == 4) {
+                    document.getElementById("metadata_balai_situs").innerHTML = "IV"
+                } else if (alldata_json["Balai"] == 5) {
+                    document.getElementById("metadata_balai_situs").innerHTML = "V"
+                } else {
+                    document.getElementById("metadata_balai_situs").innerHTML = ""
+                }
+
+                console.log("cek", alldata_json)
+                document.getElementById("metadata_lintang_situs").innerHTML = alldata_json["Lintang"]
+                document.getElementById("metadata_bujur_situs").innerHTML = alldata_json["Bujur"]
+                document.getElementById("metadata_keterangan_situs").innerHTML = alldata_json["Keterangan"]
+
+            }
+        }
+        xhttp.open("GET", `get_data_situs/${kode_stasiun}`, true)
+        xhttp.send()
+    }
+</script>
+<!--END POPUP KONTEN-->
+
+<!--START FOR ALAT TAMBAHAN-->
+<script>
+var real_count_tambah_alat = 0
+var history_count_tambah_alat_hapus = []
+var default_total_alat = 1
+
+function tambah_alat_spesifik(nama_alat) {
+    var ambil_history = false
+    var count_tambah_alat = real_count_tambah_alat
+
+    //check apa alat ini sudah ditambahkan?
+    var sudah_ada_alat = false
+    for (let iter_ada_alat = 0; iter_ada_alat < count_tambah_alat; iter_ada_alat++) {
+        let check_alat_tambahan = document.getElementById(`nama_tambah_alat_${iter_ada_alat}`)
+        console.log("check pengecekan nama alat", check_alat_tambahan, iter_ada_alat)
+        try {
+            if (check_alat_tambahan.value == nama_alat) {
+                sudah_ada_alat = true
+            }
+        } catch(err) {
+            continue
+        }
+        
+    }
+
+    if (sudah_ada_alat) {
+        return
+    }
+
+    //start tambah alat seperti biasa
+    var div_row = document.getElementById("row_alat_tambahan")
+    var single_div_row = document.createElement("div")
+    single_div_row.style.border = "2px solid black"
+    single_div_row.style.margin = "1px"
+    single_div_row.style.padding = "1px"
+    id_single_div = `rowdiv_tambah_alat_${count_tambah_alat}`
+    single_div_row.id = id_single_div
+
+    var h3 = document.createElement("h3")
+    h3.innerHTML = 'Nama Alat'
+    single_div_row.appendChild(h3)
+
+    var input = document.createElement("input")
+    input.name = `nama_tambah_alat_${count_tambah_alat}`
+    input.id = `nama_tambah_alat_${count_tambah_alat}`
+    input.value = nama_alat
+    input.readOnly = true
+    single_div_row.appendChild(input)
+
+    var h3 = document.createElement("h3")
+    h3.innerHTML = 'Jumlah Alat'
+    single_div_row.appendChild(h3)
+
+    var select = document.createElement("select")
+    select.name = `jumlah_tambah_alat_${count_tambah_alat}`
+    select.id = `jumlah_tambah_alat_${count_tambah_alat}`
+    select.setAttribute("onChange", `ubah_total_alat_tambahan(${count_tambah_alat}, 'rowdiv_tambah_alat_inner_${count_tambah_alat}')`)
+
+    for (var iter_opsi = 1; iter_opsi < 11; iter_opsi++) {
+        var opsi = document.createElement("option")
+        opsi.value = iter_opsi
+        opsi.innerHTML = iter_opsi
+        select.appendChild(opsi)
+    }
+    select.value = default_total_alat
+    single_div_row.appendChild(select)
+
+    var div_inner = document.createElement("div")
+    div_inner.id = `rowdiv_tambah_alat_inner_${count_tambah_alat}`
+    single_div_row.appendChild(div_inner)
+
+    var button = document.createElement('button')
+    button.style.backgroundColor = '#354259'
+    var img = document.createElement('img')
+    img.src = 'static_peralatan/img/x.svg'
+    button.appendChild(img)
+    button.setAttribute('onClick', `delete_tambahan_alat(${count_tambah_alat}, 'rowdiv_tambah_alat_${count_tambah_alat}')`)
+    single_div_row.appendChild(button)
+
+    div_row.appendChild(single_div_row)
+
+    //operation according to total alat
+    ubah_total_alat_tambahan(count_tambah_alat, `rowdiv_tambah_alat_inner_${count_tambah_alat}`, default_total_alat)
+    
+    if (!ambil_history) {
+        real_count_tambah_alat++
+    }
+    //end tambah alat seperti biasa
+}
+
+function tambah_alat() {
+    
+    var ambil_history = false
+    var count_tambah_alat = real_count_tambah_alat
+    if (history_count_tambah_alat_hapus.length > 0) {
+        count_tambah_alat = history_count_tambah_alat_hapus[0]
+        history_count_tambah_alat_hapus.shift()
+        ambil_history = true
+    }
+
+    var div_row = document.getElementById("row_alat_tambahan")
+    var single_div_row = document.createElement("div")
+    single_div_row.style.border = "2px solid black"
+    single_div_row.style.margin = "1px"
+    single_div_row.style.padding = "1px"
+    id_single_div = `rowdiv_tambah_alat_${count_tambah_alat}`
+    single_div_row.id = id_single_div
+
+    var h3 = document.createElement("h3")
+    h3.innerHTML = 'Nama Alat'
+    single_div_row.appendChild(h3)
+
+    var input = document.createElement("input")
+    input.name = `nama_tambah_alat_${count_tambah_alat}`
+    input.id = `nama_tambah_alat_${count_tambah_alat}`
+    single_div_row.appendChild(input)
+
+    var h3 = document.createElement("h3")
+    h3.innerHTML = 'Jumlah Alat'
+    single_div_row.appendChild(h3)
+
+    var select = document.createElement("select")
+    select.name = `jumlah_tambah_alat_${count_tambah_alat}`
+    select.id = `jumlah_tambah_alat_${count_tambah_alat}`
+    select.setAttribute("onChange", `ubah_total_alat_tambahan(${count_tambah_alat}, 'rowdiv_tambah_alat_inner_${count_tambah_alat}')`)
+
+    for (var iter_opsi = 1; iter_opsi < 11; iter_opsi++) {
+        var opsi = document.createElement("option")
+        opsi.value = iter_opsi
+        opsi.innerHTML = iter_opsi
+        select.appendChild(opsi)
+    }
+    select.value = default_total_alat
+    single_div_row.appendChild(select)
+
+    var div_inner = document.createElement("div")
+    div_inner.id = `rowdiv_tambah_alat_inner_${count_tambah_alat}`
+    single_div_row.appendChild(div_inner)
+
+    var button = document.createElement('button')
+    button.style.backgroundColor = '#354259'
+    var img = document.createElement('img')
+    img.src = 'static_peralatan/img/x.svg'
+    button.appendChild(img)
+    button.setAttribute('onClick', `delete_tambahan_alat(${count_tambah_alat}, 'rowdiv_tambah_alat_${count_tambah_alat}')`)
+    single_div_row.appendChild(button)
+
+    div_row.appendChild(single_div_row)
+
+    //operation according to total alat
+    ubah_total_alat_tambahan(count_tambah_alat, `rowdiv_tambah_alat_inner_${count_tambah_alat}`, default_total_alat)
+    
+    if (!ambil_history) {
+        real_count_tambah_alat++
+    }
+}
+
+function delete_tambahan_alat(id_count, id_singlediv_row) {
+    var ele = document.getElementById(id_singlediv_row)
+    ele.remove()
+    history_count_tambah_alat_hapus.push(parseInt(id_count))
+    if (history_count_tambah_alat_hapus.length > 1) {
+        history_count_tambah_alat_hapus.sort(function(a, b) {
+            return a - b
+        })
+    }
+}
+
+function ubah_total_alat_tambahan(id_count, id_alat_tambahan, total_alat=0) {
+    if (total_alat == 0) {
+        try {
+            total_alat = parseInt(document.getElementById(`jumlah_tambah_alat_${id_count}`).value)
+        } catch {
+            total_alat = 1
+        }
+    }
+    var d = new Date()
+    var tahun_terbaru = d.getFullYear()
+
+    var single_div_row = document.getElementById(id_alat_tambahan)
+    single_div_row.innerHTML = ''
+
+    var h3 = document.createElement("h3")
+    h3.innerHTML = 'Merk Alat'
+    single_div_row.appendChild(h3)
+    for (var iter_merk = 0; iter_merk < total_alat; iter_merk++) {
+        var input = document.createElement("input")
+        input.name = `merk_tambah_alat_${id_count}_${iter_merk}`
+        input.id = `merk_tambah_alat_${id_count}_${iter_merk}`
+        input.type = 'text'
+        single_div_row.appendChild(input)
+    }
+
+    var h3 = document.createElement("h3")
+    h3.innerHTML = 'Status Alat'
+    single_div_row.appendChild(h3)
+    for (var iter_status = 0; iter_status < total_alat; iter_status++) {
+        var select = document.createElement("select")
+        select.name = `status_tambah_alat_${id_count}_${iter_status}`
+        select.id = `status_tambah_alat_${id_count}_${iter_status}`
+        
+        var option = document.createElement('option')
+        option.value = 'on'
+        option.innerHTML = 'on'
+        select.appendChild(option)
+
+        var option = document.createElement('option')
+        option.value = 'off'
+        option.innerHTML = 'off'
+        select.appendChild(option)
+        single_div_row.appendChild(select)
+    }
+
+    var h3 = document.createElement("h3")
+    h3.innerHTML = 'Tahun Pengadaan Alat'
+    single_div_row.appendChild(h3)
+    for (var iter_pengadaan = 0; iter_pengadaan < total_alat; iter_pengadaan++) {
+        var input = document.createElement("input")
+        input.name = `tahunpengadaan_tambah_alat_${id_count}_${iter_pengadaan}`
+        input.id = `tahunpengadaan_tambah_alat_${id_count}_${iter_pengadaan}`
+        input.type = 'number'
+        input.value = tahun_terbaru
+        single_div_row.appendChild(input)
+    }
+
+    var h3 = document.createElement("h3")
+    h3.innerHTML = 'Tahun Kalibrasi Alat'
+    single_div_row.appendChild(h3)
+    for (var iter_pengadaan = 0; iter_pengadaan < total_alat; iter_pengadaan++) {
+        var input = document.createElement("input")
+        input.name = `tahunkalibrasi_tambah_alat_${id_count}_${iter_pengadaan}`
+        input.id = `tahunkalibrasi_tambah_alat_${id_count}_${iter_pengadaan}`
+        input.type = 'number'
+        input.value = tahun_terbaru
+        single_div_row.appendChild(input)
+    }
+
+    var h3 = document.createElement("h3")
+    h3.innerHTML = 'Performa Alat'
+    single_div_row.appendChild(h3)
+    for (var iter_pengadaan = 0; iter_pengadaan < total_alat; iter_pengadaan++) {
+        var input = document.createElement("input")
+        input.name = `performa_tambah_alat_${id_count}_${iter_pengadaan}`
+        input.id = `performa_tambah_alat_${id_count}_${iter_pengadaan}`
+        input.type = 'number'
+        input.min = 0
+        input.max = 100
+        input.value = 100
+        single_div_row.appendChild(input)
+    }
+
+    var h3 = document.createElement("h3")
+    h3.innerHTML = 'Keadaan Alat'
+    single_div_row.appendChild(h3)
+    for (var iter_keadaan = 0; iter_keadaan < total_alat; iter_keadaan++) {
+        var select = document.createElement("select")
+        select.name = `keadaan_tambah_alat_${id_count}_${iter_keadaan}`
+        select.id = `keadaan_tambah_alat_${id_count}_${iter_keadaan}`
+        
+        var option = document.createElement('option')
+        option.value = 'b'
+        option.innerHTML = 'Baik'
+        select.appendChild(option)
+
+        var option = document.createElement('option')
+        option.value = 'r'
+        option.innerHTML = 'Rusak'
+        select.appendChild(option)
+        single_div_row.appendChild(select)
+
+        var option = document.createElement('option')
+        option.value = 'rb'
+        option.innerHTML = 'Rusak Berat'
+        select.appendChild(option)
+        single_div_row.appendChild(select)
+    }
+
+    var h3 = document.createElement("h3")
+    h3.innerHTML = 'Keterangan Alat'
+    single_div_row.appendChild(h3)
+    for (var iter_pengadaan = 0; iter_pengadaan < total_alat; iter_pengadaan++) {
+        var input = document.createElement("input")
+        input.name = `keterangan_tambah_alat_${id_count}_${iter_pengadaan}`
+        input.id = `keterangan_tambah_alat_${id_count}_${iter_pengadaan}`
+        input.type = 'text'
+        single_div_row.appendChild(input)
+    }
+}
+</script>
+<!--END FOR ALAT TAMBAHAN-->
+
+<script>
+
+function markerOnClick() {
+    var list_alat_str = document.getElementById("daftar_alat").innerHTML
+    list_alat_str = list_alat_str.split(",")
+
+    var list_alat = []
+    for (var i = 0; i < list_alat_str.length; i++) {
+        if (list_alat_str[i] == "") {
+            continue
+        }
+        list_alat.push(list_alat_str[i]);
+    }
+    var kode = this.options.kode_situs
+    console.log(alldata_json)
+    document.getElementById('modal_kode_stasiun').innerHTML = kode
+
+    var div_status = document.getElementById("modal_status_alat")
+    div_status.innerHTML = ""
+
+    var modal_table_utama = document.createElement("table")
+    modal_table_utama.setAttribute("border", "1px solid black")
+    for (var i = 0; i < list_alat.length; i++) {
+        var tr = document.createElement("tr")
+        var td = document.createElement("td")
+        td.setAttribute("colspan", "2")
+        td.innerHTML = "<b>"+ list_alat[i]+"</b>"
+        tr.appendChild(td)
+        modal_table_utama.appendChild(tr)
+        var jumlah_status = 0
+        if (alldata_json[kode]['jumlah'][i] <= 5) {
+            jumlah_status = alldata_json[kode]['jumlah'][i]
+        } else {
+            jumlah_status = 5
+        }
+        
+        //if (alldata_json[kode]['kode_alat'] == "LLWAS") {
+        //    jumlah_status = alldata_json[kode]['jumlah']
+        //    console.log("cek jumlah status", jumlah_status)
+        //}
+
+        for (var ii = 0; ii < jumlah_status; ii++) {
+            var tr = document.createElement("tr")
+            var td = document.createElement("td")
+            td.innerHTML = "Merk "+list_alat[i]+" ("+parseInt(ii+1)+")"
+            tr.appendChild(td)
+            var td = document.createElement("td")
+            try {
+                td.innerHTML = alldata_json[kode]['merk'][i][ii]
+            } catch (err) {
+                td.innerHTML = "-"
+            }
+            tr.appendChild(td)
+            modal_table_utama.appendChild(tr)
+
+            var tr = document.createElement("tr")
+            var td = document.createElement("td")
+            td.innerHTML = "Tahun Pengadaan "+list_alat[i]+" ("+parseInt(ii+1)+")"
+            tr.appendChild(td)
+            var td = document.createElement("td")
+            try {
+                td.innerHTML =alldata_json[kode]['tahun_pengadaan'][i][ii]
+            } catch (err) {
+                td.innerHTML = "-"
+            }
+            tr.appendChild(td)
+            modal_table_utama.appendChild(tr)
+
+            var tr = document.createElement("tr")
+            var td = document.createElement("td")
+            td.innerHTML = "Tahun Kalibrasi "+list_alat[i]+" ("+parseInt(ii+1)+")"
+            tr.appendChild(td)
+            var td = document.createElement("td")
+            try {
+                td.innerHTML =alldata_json[kode]['tahun_kalibrasi'][i][ii]
+            } catch (err) {
+                td.innerHTML = "-"
+            }
+            tr.appendChild(td)
+            modal_table_utama.appendChild(tr)
+
+            var tr = document.createElement("tr")
+            var td = document.createElement("td")
+            td.innerHTML = "Status "+list_alat[i]+" ("+parseInt(ii+1)+")"
+            tr.appendChild(td)
+            var td = document.createElement("td")
+            try {
+                td.innerHTML = alldata_json[kode]['status_list'][i][ii]
+            } catch (err) {
+                td.innerHTML = "-"
+            }
+            tr.appendChild(td)
+            modal_table_utama.appendChild(tr)
+
+            var tr = document.createElement("tr")
+            var td = document.createElement("td")
+            td.innerHTML = "Performa "+list_alat[i]+" ("+parseInt(ii+1)+")"
+            tr.appendChild(td)
+            var td = document.createElement("td")
+            try {
+                td.innerHTML = alldata_json[kode]['performa'][i][ii]
+            } catch (err) {
+                td.innerHTML = "-"
+            }
+            tr.appendChild(td)
+            modal_table_utama.appendChild(tr)
+
+            var tr = document.createElement("tr")
+            var td = document.createElement("td")
+            td.innerHTML = "Keterangan "+list_alat[i]+" ("+parseInt(ii+1)+")"
+            tr.appendChild(td)
+            var td = document.createElement("td")
+            try {
+                td.innerHTML = alldata_json[kode]['ket_list'][i][ii]
+            } catch (err) {
+                td.innerHTML = "-"
+            }
+            tr.appendChild(td)
+            modal_table_utama.appendChild(tr)
+
+        }
+    }
+    div_status.appendChild(modal_table_utama)
+
+    document.getElementById('overlay').classList.add('is-visible')
+    document.getElementById('modal').classList.add('is-visible')
+}
+
+
+list_situs_global = []
+function update_peta() {
+	var list_situs = []
+	var list_lintang = []
+	var list_bujur = []
+	var list_alat = []
+	var list_status_alat = []
+	var list_keterangan_alat = []
+
+	var situs_marker = []
+	var xhttp = new XMLHttpRequest();
+	xhttp.onreadystatechange = function() {
+		if (this.readyState == 4 && this.status == 200) {
+			var alldata = this.responseText
+			var alldata_json = JSON.parse(alldata);
+			var situs_all = Object.keys(alldata_json);
+
+            var d_today = new Date()
+            d_today.setHours(0)
+            d_today.setMinutes(0)
+            d_today.setSeconds(0)
+            d_today.setMilliseconds(0)
+            for (var i=0; i<situs_all.length; i++) {
+                var time_situs = Date.parse(alldata_json[situs_all[i]]["waktu"]);
+                list_situs.push(situs_all[i])
+                list_situs_global.push(situs_all[i])
+				list_lintang.push(alldata_json[situs_all[i]]["lintang"])
+				list_bujur.push(alldata_json[situs_all[i]]["bujur"])
+
+                /*if (time_situs > d_today) {
+                    situs_marker.push(L.marker([list_lintang[i], list_bujur[i]], {icon: icon_kantor_update, "kode_situs": situs_all[i]}).on('click', click_site))
+                    situs_marker[(situs_marker.length)-1].addTo(info_kantor_update);
+                } else {
+                    situs_marker.push(L.marker([list_lintang[i], list_bujur[i]], {icon: icon_kantor_tidak_update, "kode_situs": situs_all[i]}).on('click', click_site))
+                    situs_marker[(situs_marker.length)-1].addTo(info_kantor_tidak_update);
+                }*/
+                situs_marker.push(L.marker([list_lintang[i], list_bujur[i]], {icon: icon_kantor, "kode_situs": situs_all[i]}).on('click', click_site))
+                situs_marker[(situs_marker.length)-1].addTo(info_kantor);
+            }
+            //info_kantor_update.addTo(mymap)
+            //info_kantor_tidak_update.addTo(mymap)
+            //layer_control.addOverlay(info_kantor_update, "situs update hari ini")
+            //layer_control.addOverlay(info_kantor_tidak_update, "situs tidak update hari ini")
+            layer_control.addOverlay(info_kantor, "situs")
+            layer_control.addTo(mymap)
+            update_peta_alat_penting()
+
+		}
+	};
+	
+	//xhttp.open("GET", "get_data_peta", true);
+    xhttp.open("GET", "get_data_peta_new", true);
+	xhttp.send();
+}
+
+const peralatan_penting = ["AWOS***on", "AWOS***off", "LLWAS***on", "LLWAS***off", "tambahan***radar ws***on", 
+"tambahan***radar ws***off", "tambahan***lidar ws***on", "tambahan***lidar ws***off",
+"tambahan***lidar va***on", "tambahan***lidar va***off", 
+"tambahan***rason***on", "tambahan***rason***off", 
+"tambahan***wind profiler***on", "tambahan***wind profiler***off"]
+function update_peta_alat_penting() {
+    var xhttp = new XMLHttpRequest();
+	xhttp.onreadystatechange = function() {
+		if (this.readyState == 4 && this.status == 200) {
+            var alldata = this.responseText
+			var alldata_json = JSON.parse(alldata);
+            //console.log("cek alat penting", alldata_json)
+            for (var iter_penting = 0; iter_penting < peralatan_penting.length; iter_penting++) {
+                var list_situs_penting = alldata_json[peralatan_penting[iter_penting]]
+                //console.log("cek situs penting", list_situs_penting)
+                if (list_situs_penting === undefined) {
+                    list_situs_penting = []
+                }
+                for (var iterp = 0; iterp<list_situs_penting.length; iterp++) {
+                    if (peralatan_penting[iter_penting] == "AWOS***on") {
+                        var marker_alat = L.marker([list_situs_penting[iterp]['Lintang'], list_situs_penting[iterp]['Bujur']], {icon: icon_site_awos_on, "kode_situs": list_situs_penting[iterp]['Kode_situs']}).on('click', click_site)
+                        marker_alat.addTo(site_awos_on)
+                    } else if (peralatan_penting[iter_penting] == "AWOS***off") {
+                        var marker_alat = L.marker([list_situs_penting[iterp]['Lintang'], list_situs_penting[iterp]['Bujur']], {icon: icon_site_awos_off, "kode_situs": list_situs_penting[iterp]['Kode_situs']}).on('click', click_site)
+                        marker_alat.addTo(site_awos_off)
+                    } else if (peralatan_penting[iter_penting] == "LLWAS***on") {
+                        var marker_alat = L.marker([list_situs_penting[iterp]['Lintang'], list_situs_penting[iterp]['Bujur']], {icon: icon_site_llwas_on, "kode_situs": list_situs_penting[iterp]['Kode_situs']}).on('click', click_site)
+                        marker_alat.addTo(site_llwas_on)
+                    } else if (peralatan_penting[iter_penting] == "LLWAS***off") {
+                        var marker_alat = L.marker([list_situs_penting[iterp]['Lintang'], list_situs_penting[iterp]['Bujur']], {icon: icon_site_llwas_off, "kode_situs": list_situs_penting[iterp]['Kode_situs']}).on('click', click_site)
+                        marker_alat.addTo(site_llwas_off)
+                    } else if (peralatan_penting[iter_penting] == "tambahan***radar ws***on") {
+                        var marker_alat = L.marker([list_situs_penting[iterp]['Lintang'], list_situs_penting[iterp]['Bujur']], {icon: icon_site_radar_ws_on, "kode_situs": list_situs_penting[iterp]['Kode_situs']}).on('click', click_site)
+                        marker_alat.addTo(site_radar_ws_on)
+                    } else if (peralatan_penting[iter_penting] == "tambahan***radar ws***off") {
+                        var marker_alat = L.marker([list_situs_penting[iterp]['Lintang'], list_situs_penting[iterp]['Bujur']], {icon: icon_site_radar_ws_off, "kode_situs": list_situs_penting[iterp]['Kode_situs']}).on('click', click_site)
+                        marker_alat.addTo(site_radar_ws_off)
+                    } else if (peralatan_penting[iter_penting] == "tambahan***lidar ws***on") {
+                        var marker_alat = L.marker([list_situs_penting[iterp]['Lintang'], list_situs_penting[iterp]['Bujur']], {icon: icon_site_lidar_ws_on, "kode_situs": list_situs_penting[iterp]['Kode_situs']}).on('click', click_site)
+                        marker_alat.addTo(site_lidar_ws_on)
+                    } else if (peralatan_penting[iter_penting] == "tambahan***lidar ws***off") {
+                        var marker_alat = L.marker([list_situs_penting[iterp]['Lintang'], list_situs_penting[iterp]['Bujur']], {icon: icon_site_lidar_ws_off, "kode_situs": list_situs_penting[iterp]['Kode_situs']}).on('click', click_site)
+                        marker_alat.addTo(site_lidar_ws_off)
+                    } else if (peralatan_penting[iter_penting] == "tambahan***lidar va***on") {
+                        var marker_alat = L.marker([list_situs_penting[iterp]['Lintang'], list_situs_penting[iterp]['Bujur']], {icon: icon_site_lidar_va_on, "kode_situs": list_situs_penting[iterp]['Kode_situs']}).on('click', click_site)
+                        marker_alat.addTo(site_lidar_va_on)
+                    } else if (peralatan_penting[iter_penting] == "tambahan***lidar va***off") {
+                        var marker_alat = L.marker([list_situs_penting[iterp]['Lintang'], list_situs_penting[iterp]['Bujur']], {icon: icon_site_lidar_va_off, "kode_situs": list_situs_penting[iterp]['Kode_situs']}).on('click', click_site)
+                        marker_alat.addTo(site_lidar_va_off)
+                    } else if (peralatan_penting[iter_penting] == "tambahan***rason***on") {
+                        var marker_alat = L.marker([list_situs_penting[iterp]['Lintang'], list_situs_penting[iterp]['Bujur']], {icon: icon_site_rason_on, "kode_situs": list_situs_penting[iterp]['Kode_situs']}).on('click', click_site)
+                        marker_alat.addTo(site_rason_on)
+                    } else if (peralatan_penting[iter_penting] == "tambahan***rason***on") {
+                        var marker_alat = L.marker([list_situs_penting[iterp]['Lintang'], list_situs_penting[iterp]['Bujur']], {icon: icon_site_rason_off, "kode_situs": list_situs_penting[iterp]['Kode_situs']}).on('click', click_site)
+                        marker_alat.addTo(site_rason_off)
+                    } else if (peralatan_penting[iter_penting] == "tambahan***wind profiler***on") {
+                        var marker_alat = L.marker([list_situs_penting[iterp]['Lintang'], list_situs_penting[iterp]['Bujur']], {icon: icon_site_wind_profiler_on, "kode_situs": list_situs_penting[iterp]['Kode_situs']}).on('click', click_site)
+                        marker_alat.addTo(site_wind_profiler_on)
+                    } else if (peralatan_penting[iter_penting] == "tambahan***wind profiler***off") {
+                        var marker_alat = L.marker([list_situs_penting[iterp]['Lintang'], list_situs_penting[iterp]['Bujur']], {icon: icon_site_wind_profiler_off, "kode_situs": list_situs_penting[iterp]['Kode_situs']}).on('click', click_site)
+                        marker_alat.addTo(site_wind_profiler_off)
+                    }
+                }
+            }
+            layer_control.addOverlay(site_awos_on, "situs AWOS On")
+            layer_control.addOverlay(site_awos_off, "situs AWOS Off")
+            layer_control.addOverlay(site_llwas_on, "situs LLWAS On")
+            layer_control.addOverlay(site_llwas_off, "situs LLWAS Off")
+            layer_control.addOverlay(site_llwas_on, "situs Radar WS On")
+            layer_control.addOverlay(site_llwas_off, "situs Radar WS Off")
+            layer_control.addOverlay(site_lidar_ws_on, "situs Lidar WS On")
+            layer_control.addOverlay(site_lidar_ws_off, "situs Lidar WS Off")
+            layer_control.addOverlay(site_lidar_va_on, "situs Lidar VA On")
+            layer_control.addOverlay(site_lidar_va_off, "situs Lidar VA Off")
+            layer_control.addOverlay(site_rason_on, "situs rason on")
+            layer_control.addOverlay(site_rason_off, "situs rason off")
+            layer_control.addOverlay(site_wind_profiler_on, "situs wind profiler On")
+            layer_control.addOverlay(site_wind_profiler_off, "situs wind profiler Off")
+        }
+    }
+    xhttp.open("GET", "get_data_peta_alat_penting", true);
+	xhttp.send();
+}
+
+
+
+var info_kantor = L.layerGroup();
+var icon_kantor = L.icon({
+	iconUrl: 'static_peralatan/img/kantor.png',
+
+	iconSize:	 [15, 15], // size of the icon
+	iconAnchor:   [8, 8], // point of the icon which will correspond to marker's location
+	popupAnchor:  [6, 0] // point from which the popup should open relative to the iconAnchor
+})
+
+var info_kantor_update = L.layerGroup();
+var icon_kantor_update = L.icon({
+	iconUrl: 'static_peralatan/img/kantor_update.png',
+
+	iconSize:	 [15, 15], // size of the icon
+	iconAnchor:   [8, 8], // point of the icon which will correspond to marker's location
+	popupAnchor:  [6, 0] // point from which the popup should open relative to the iconAnchor
+})
+
+var info_kantor_tidak_update = L.layerGroup();
+var icon_kantor_tidak_update = L.icon({
+	iconUrl: 'static_peralatan/img/kantor_tidak_update.png',
+
+	iconSize:	 [15, 15], // size of the icon
+	iconAnchor:   [8, 8], // point of the icon which will correspond to marker's location
+	popupAnchor:  [6, 0] // point from which the popup should open relative to the iconAnchor
+})
+
+var site_awos_on = L.layerGroup()
+var icon_site_awos_on = L.icon({
+	iconUrl: 'static_peralatan/img/awos_baik.png',
+
+	iconSize:	 [15, 15], // size of the icon
+	iconAnchor:   [8, 8], // point of the icon which will correspond to marker's location
+	popupAnchor:  [6, 0] // point from which the popup should open relative to the iconAnchor
+})
+
+var site_awos_off = L.layerGroup()
+var icon_site_awos_off = L.icon({
+	iconUrl: 'static_peralatan/img/awos_rusak.png',
+
+	iconSize:	 [15, 15], // size of the icon
+	iconAnchor:   [8, 8], // point of the icon which will correspond to marker's location
+	popupAnchor:  [6, 0] // point from which the popup should open relative to the iconAnchor
+})
+
+var site_llwas_on = L.layerGroup()
+var icon_site_llwas_on = L.icon({
+	iconUrl: 'static_peralatan/img/llwas_baik.png',
+
+	iconSize:	 [15, 15], // size of the icon
+	iconAnchor:   [8, 8], // point of the icon which will correspond to marker's location
+	popupAnchor:  [6, 0] // point from which the popup should open relative to the iconAnchor
+})
+
+var site_llwas_off = L.layerGroup()
+var icon_site_llwas_off = L.icon({
+	iconUrl: 'static_peralatan/img/llwas_rusak.png',
+
+	iconSize:	 [15, 15], // size of the icon
+	iconAnchor:   [8, 8], // point of the icon which will correspond to marker's location
+	popupAnchor:  [6, 0] // point from which the popup should open relative to the iconAnchor
+})
+
+var site_radar_ws_on = L.layerGroup()
+var icon_site_radar_ws_on = L.icon({
+	iconUrl: 'static_peralatan/img/radar_baik.png',
+
+	iconSize:	 [15, 15], // size of the icon
+	iconAnchor:   [8, 8], // point of the icon which will correspond to marker's location
+	popupAnchor:  [6, 0] // point from which the popup should open relative to the iconAnchor
+})
+
+var site_radar_ws_off = L.layerGroup()
+var icon_site_radar_ws_off = L.icon({
+	iconUrl: 'static_peralatan/img/radar_rusak.png',
+
+	iconSize:	 [15, 15], // size of the icon
+	iconAnchor:   [8, 8], // point of the icon which will correspond to marker's location
+	popupAnchor:  [6, 0] // point from which the popup should open relative to the iconAnchor
+})
+
+var site_lidar_va_on = L.layerGroup()
+var icon_site_lidar_va_on = L.icon({
+	iconUrl: 'static_peralatan/img/lidar_va_baik.png',
+
+	iconSize:	 [15, 15], // size of the icon
+	iconAnchor:   [8, 8], // point of the icon which will correspond to marker's location
+	popupAnchor:  [6, 0] // point from which the popup should open relative to the iconAnchor
+})
+
+var site_lidar_va_off = L.layerGroup()
+var icon_site_lidar_va_off = L.icon({
+	iconUrl: 'static_peralatan/img/lidar_va_rusak.png',
+
+	iconSize:	 [15, 15], // size of the icon
+	iconAnchor:   [8, 8], // point of the icon which will correspond to marker's location
+	popupAnchor:  [6, 0] // point from which the popup should open relative to the iconAnchor
+})
+
+var site_lidar_ws_on = L.layerGroup()
+var icon_site_lidar_ws_on = L.icon({
+	iconUrl: 'static_peralatan/img/lidar_ws_baik.png',
+
+	iconSize:	 [15, 15], // size of the icon
+	iconAnchor:   [8, 8], // point of the icon which will correspond to marker's location
+	popupAnchor:  [6, 0] // point from which the popup should open relative to the iconAnchor
+})
+
+var site_lidar_ws_off = L.layerGroup()
+var icon_site_lidar_ws_off = L.icon({
+	iconUrl: 'static_peralatan/img/lidar_ws_rusak.png',
+
+	iconSize:	 [15, 15], // size of the icon
+	iconAnchor:   [8, 8], // point of the icon which will correspond to marker's location
+	popupAnchor:  [6, 0] // point from which the popup should open relative to the iconAnchor
+})
+
+var site_rason_on = L.layerGroup()
+var icon_site_rason_on = L.icon({
+	iconUrl: 'static_peralatan/img/rason_baik.png',
+
+	iconSize:	 [15, 15], // size of the icon
+	iconAnchor:   [8, 8], // point of the icon which will correspond to marker's location
+	popupAnchor:  [6, 0] // point from which the popup should open relative to the iconAnchor
+})
+
+var site_rason_off = L.layerGroup()
+var icon_site_rason_off = L.icon({
+	iconUrl: 'static_peralatan/img/rason_rusak.png',
+
+	iconSize:	 [15, 15], // size of the icon
+	iconAnchor:   [8, 8], // point of the icon which will correspond to marker's location
+	popupAnchor:  [6, 0] // point from which the popup should open relative to the iconAnchor
+})
+
+var site_wind_profiler_on = L.layerGroup()
+var icon_site_wind_profiler_on = L.icon({
+	iconUrl: 'static_peralatan/img/wind_profiler_baik.png',
+
+	iconSize:	 [15, 15], // size of the icon
+	iconAnchor:   [8, 8], // point of the icon which will correspond to marker's location
+	popupAnchor:  [6, 0] // point from which the popup should open relative to the iconAnchor
+})
+
+var site_wind_profiler_off = L.layerGroup()
+var icon_site_wind_profiler_off = L.icon({
+	iconUrl: 'static_peralatan/img/wind_profiler_rusak.png',
+
+	iconSize:	 [15, 15], // size of the icon
+	iconAnchor:   [8, 8], // point of the icon which will correspond to marker's location
+	popupAnchor:  [6, 0] // point from which the popup should open relative to the iconAnchor
+})
+
+var Stadia_AlidadeSmoothDark = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
+	maxZoom: 20,
+	attribution: '&copy; by Genomexyz',
+	status: 'BASE_LAYER'
+	});
+
+var mymap = L.map('map', {
+    layers: [Stadia_AlidadeSmoothDark, info_kantor]
+}).setView([0, 120], 5);
+
+//Stadia_AlidadeSmoothDark.addTo(mymap);
+var baseLayers = {
+	"Dark Mode": Stadia_AlidadeSmoothDark,
+};
+var layer_control = L.control.layers(baseLayers, []).addTo(mymap)
+//layer_control.addBaseLayer(Stadia_AlidadeSmoothDark, "Dark Mode");
+
+var popup = L.popup();
+
+	function onMapClick(e) {
+		popup
+			.setLatLng(e.latlng)
+			.setContent("Koordinat: " + e.latlng.toString())
+			.openOn(mymap);
+	}
+
+// create the sidebar instance and add it to the map
+		var sidebar = L.control.sidebar({ container: 'sidebar' })
+			.addTo(mymap)
+			.open('home');
+
+		// be notified when a panel is opened
+		sidebar.on('content', function (ev) {
+			switch (ev.id) {
+				case 'autopan':
+				sidebar.options.autopan = true;
+				break;
+				default:
+				sidebar.options.autopan = false;
+			}
+		});
+
+		var userid = 0
+		function addUser() {
+			sidebar.addPanel({
+				id:   'user' + userid++,
+				tab:  '<i class="fa fa-user"></i>',
+				title: 'User Profile ' + userid,
+				pane: '<p>user ipsum dolor sit amet</p>',
+			});
+		}
+
+	mymap.on('click', onMapClick);
+
+update_peta()
+//update_peta_alat_penting()
+</script>
+
+
+
+
+
+
+<script>
+
+var alldata_alat
+var dict_kode_nama_alat = {}
+var dict_kode_iter = {}
+
+var list_status = ['on', 'off']
+var list_status_text = ['on', 'off']
+
+function update_set_alat_kompleks(mode_update = false) {
+    real_count_tambah_alat = 0
+    var default_jumlah = 0
+    var default_jumlah_site = 1
+
+    var div_induk = document.getElementById('list_opsi_alat_kompleks')
+    div_induk.innerHTML = ''
+    var string_data_alat_kompleks = document.getElementById('detail_alat_kompleks').innerHTML
+    var data_alat_kompleks = JSON.parse(string_data_alat_kompleks)
+    alldata_alat = data_alat_kompleks
+    for (var iter_alat = 0; iter_alat < data_alat_kompleks.length; iter_alat++) {
+        dict_kode_nama_alat[data_alat_kompleks[iter_alat]['Kode_alat']] = data_alat_kompleks[iter_alat]['Nama_alat']
+    }
+    console.log(data_alat_kompleks)
+
+    //generate input
+    for (var iter_alat = 0; iter_alat < data_alat_kompleks.length; iter_alat++) {
+        var nama_sensor_alat = data_alat_kompleks[iter_alat]['Nama_alat']
+        var kode_sensor_alat = data_alat_kompleks[iter_alat]['Kode_alat']
+        var kategori_sensor = data_alat_kompleks[iter_alat]['List_jenis']
+        var list_data_sensor = data_alat_kompleks[iter_alat]['List_sensor']
+
+        dict_kode_iter[kode_sensor_alat] = iter_alat
+
+        var h3 = document.createElement("h3")
+        h3.innerHTML = `Jumlah Site ${nama_sensor_alat}`
+        div_induk.appendChild(h3)
+
+        var select = document.createElement("select")
+        select.name = `${kode_sensor_alat}_jumlah_kompleks`
+        select.id = `${kode_sensor_alat}_jumlah_kompleks`
+
+        for (var iter_opsi = 0; iter_opsi < 6; iter_opsi++) {
+            var opsi = document.createElement("option")
+            opsi.value = iter_opsi
+            opsi.innerHTML = iter_opsi
+            select.appendChild(opsi)
+        }
+        select.value = default_jumlah
+        select.setAttribute('onChange', `set_jumlah_alat_kompleks('${kode_sensor_alat}', '${nama_sensor_alat}', ${iter_alat})`)
+        div_induk.appendChild(select)
+
+        var div_ket = document.createElement("div")
+        div_ket.id = 'list_keterangan_alat_kompleks'
+        div_ket.name = 'list_keterangan_alat_kompleks'
+
+        //generate all portion of input
+        var div_merk = document.createElement("div")
+        div_merk.id = `${kode_sensor_alat}_div_merk_kompleks`
+
+        var h3 = document.createElement("h3")
+        h3.innerHTML = `Merk ${nama_sensor_alat}`
+        div_merk.appendChild(h3)
+
+        for (var iter_input = 0; iter_input < default_jumlah; iter_input++) {
+            var input = document.createElement("input")
+            input.name = `${kode_sensor_alat}_${iter_input}_merk_kompleks`
+            input.id = `${kode_sensor_alat}_${iter_input}_merk_kompleks`
+            input.type = "text"
+            div_merk.appendChild(input)
+            if (iter_input != default_jumlah-1) {
+                var br = document.createElement("br")
+                div_merk.appendChild(br)
+            }
+        }
+        div_ket.appendChild(div_merk)
+
+        
+        var div_kategori = document.createElement("div")
+        div_kategori.id = `${kode_sensor_alat}_div_kategori_kompleks`
+
+        var h3 = document.createElement("h3")
+        h3.innerHTML = `Kategori ${nama_sensor_alat}`
+        div_kategori.appendChild(h3)
+
+        for (var iter_input = 0; iter_input < default_jumlah; iter_input++) {
+            var select = document.createElement("select")
+            select.name = `${kode_sensor_alat}_${iter_input}_kategori_kompleks`
+            select.id = `${kode_sensor_alat}_${iter_input}_kategori_kompleks`
+            for (var iter_opsi = 0; iter_opsi < kategori_sensor.length; iter_opsi++) {
+                var opsi = document.createElement("option")
+                opsi.value = kategori_sensor[iter_opsi]
+                opsi.innerHTML = kategori_sensor[iter_opsi]
+                select.appendChild(opsi)
+            }
+            div_kategori.appendChild(select)
+            if (iter_input != default_jumlah-1) {
+                var br = document.createElement("br")
+                div_kategori.appendChild(br)
+            }
+        }
+        div_ket.appendChild(div_kategori)
+
+        var div_status_alat = document.createElement("div")
+        div_status_alat.id = `${kode_sensor_alat}_div_status_kompleks`
+
+        var h3 = document.createElement("h3")
+        h3.innerHTML = `Status ${nama_sensor_alat}`
+        div_status_alat.appendChild(h3)
+
+        for (var iter_input = 0; iter_input < default_jumlah; iter_input++) {
+            var select = document.createElement("select")
+            select.name = `${kode_sensor_alat}_${iter_input}_status_kompleks`
+            select.id = `${kode_sensor_alat}_${iter_input}_status_kompleks`
+            for (var iter_opsi = 0; iter_opsi < list_status.length; iter_opsi++) {
+                var opsi = document.createElement("option")
+                opsi.value = list_status[iter_opsi]
+                opsi.innerHTML = list_status_text[iter_opsi]
+                select.appendChild(opsi)
+            }
+            div_status_alat.appendChild(select)
+            if (iter_input != default_jumlah-1) {
+                var br = document.createElement("br")
+                div_status_alat.appendChild(br)
+            }
+        }
+        div_ket.appendChild(div_status_alat)
+
+        //TAMBAHAN FORM
+        var div_tahunpengadaan = document.createElement("div")
+        div_tahunpengadaan.id = `${kode_sensor_alat}_div_tahunpengadaan_kompleks`
+
+        var h3 = document.createElement("h3")
+        h3.innerHTML = `Tahun Pengadaan ${nama_sensor_alat}`
+        div_tahunpengadaan.appendChild(h3)
+
+        for (var iter_input = 0; iter_input < default_jumlah; iter_input++) {
+            var input = document.createElement("input")
+            input.name = `${kode_sensor_alat}_${iter_input}_tahunpengadaan_kompleks`
+            input.id = `${kode_sensor_alat}_${iter_input}_tahunpengadaan_kompleks`
+            input.type = "number"
+            div_tahunpengadaan.appendChild(input)
+            if (iter_input != default_jumlah-1) {
+                var br = document.createElement("br")
+                div_tahunpengadaan.appendChild(br)
+            }
+        }
+        div_ket.appendChild(div_tahunpengadaan)
+
+        var div_tahunkalibrasi = document.createElement("div")
+        div_tahunkalibrasi.id = `${kode_sensor_alat}_div_tahunkalibrasi_kompleks`
+
+        var h3 = document.createElement("h3")
+        h3.innerHTML = `Tahun Kalibrasi ${nama_sensor_alat}`
+        div_tahunkalibrasi.appendChild(h3)
+
+        for (var iter_input = 0; iter_input < default_jumlah; iter_input++) {
+            var input = document.createElement("input")
+            input.name = `${kode_sensor_alat}_${iter_input}_tahunkalibrasi_kompleks`
+            input.id = `${kode_sensor_alat}_${iter_input}_tahunkalibrasi_kompleks`
+            input.type = "number"
+            div_tahunkalibrasi.appendChild(input)
+            if (iter_input != default_jumlah-1) {
+                var br = document.createElement("br")
+                div_tahunkalibrasi.appendChild(br)
+            }
+        }
+        div_ket.appendChild(div_tahunkalibrasi)
+        //END TAMBAHAN FORM
+
+        var div_keterangan = document.createElement("div")
+        div_keterangan.id = `${kode_sensor_alat}_div_keterangan_kompleks`
+
+        var h3 = document.createElement("h3")
+        h3.innerHTML = `Keterangan ${nama_sensor_alat}`
+        div_keterangan.appendChild(h3)
+
+        for (var iter_input = 0; iter_input < default_jumlah; iter_input++) {
+            var input = document.createElement("input")
+            input.name = `${kode_sensor_alat}_${iter_input}_keterangan_kompleks`
+            input.id = `${kode_sensor_alat}_${iter_input}_keterangan_kompleks`
+            input.type = "text"
+            div_keterangan.appendChild(input)
+            if (iter_input != default_jumlah-1) {
+                var br = document.createElement("br")
+                div_keterangan.appendChild(br)
+            }
+        }
+        div_ket.appendChild(div_keterangan)
+
+        var div_performa = document.createElement("div")
+        div_performa.id = `${kode_sensor_alat}_div_performa_kompleks`
+
+        for (var iter_input = 0; iter_input < default_jumlah; iter_input++) {
+            var h3 = document.createElement("h3")
+            h3.innerHTML = `Jumlah site komponen ${nama_sensor_alat}  ${iter_input+1}`
+            div_performa.appendChild(h3)
+
+            var select = document.createElement("select")
+            select.name = `${kode_sensor_alat}_${iter_input}_jumlah_site_kompleks`
+            select.id = `${kode_sensor_alat}_${iter_input}_jumlah_site_kompleks`
+
+            var total_opsi = 6
+            if (kode_sensor_alat == "LLWAS") {
+                total_opsi = 48
+            }
+            for (var iter_opsi = 1; iter_opsi < total_opsi; iter_opsi++) {
+                var opsi = document.createElement("option")
+                opsi.value = iter_opsi
+                opsi.innerHTML = iter_opsi
+                select.appendChild(opsi)
+            }
+            select.value = default_jumlah_site
+            select.setAttribute('onChange', `set_jumlah_site('${kode_sensor_alat}',${iter_input}, ${iter_alat})`)
+            div_performa.appendChild(select)
+
+            var div_inner_sensor = document.createElement("div")
+            div_inner_sensor.style.border = '2px solid black'
+            div_inner_sensor.style.borderRadius = '5px'
+            div_inner_sensor.id = `${kode_sensor_alat}_${iter_input}_div_inner_performa_sensor_alat_kompleks`
+            for (var iter_sensor = 0; iter_sensor < list_data_sensor.length; iter_sensor++) {
+                var single_nama_sensor = list_data_sensor[iter_sensor]['Nama_alat']
+                var single_kode_sensor = list_data_sensor[iter_sensor]['Kode_alat']
+
+                var h3 = document.createElement("h3")
+                h3.innerHTML = `Performa, keadaan, dan merk ${single_nama_sensor}`
+                div_inner_sensor.appendChild(h3)
+
+                for (var iter_inner_input = 0; iter_inner_input < default_jumlah_site; iter_inner_input++) {
+                    var input = document.createElement("input")
+                    input.name = `${kode_sensor_alat}_${iter_input}_${single_kode_sensor}_${iter_inner_input}_nilai_performa_kompleks`
+                    input.id = `${kode_sensor_alat}_${iter_input}_${single_kode_sensor}_${iter_inner_input}_nilai_performa_kompleks`
+                    input.type = 'number'
+                    input.min = -1
+                    input.max = 100
+                    div_inner_sensor.appendChild(input)
+                }
+
+                var br = document.createElement("br")
+                div_inner_sensor.appendChild(br)
+
+                //START KEADAAN KOMPONEN
+                for (var iter_inner_input = 0; iter_inner_input < default_jumlah_site; iter_inner_input++) {
+                    var select = document.createElement("select")
+                    select.name = `${kode_sensor_alat}_${iter_input}_${single_kode_sensor}_${iter_inner_input}_keadaan_performa_kompleks`
+                    select.id = `${kode_sensor_alat}_${iter_input}_${single_kode_sensor}_${iter_inner_input}_keadaan_performa_kompleks`
+                    
+                    var option = document.createElement("option")
+                    option.value = 'nil'
+                    option.innerHTML = 'Tidak ada'
+                    select.appendChild(option)
+
+                    var option = document.createElement("option")
+                    option.value = 'b'
+                    option.innerHTML = 'Baik'
+                    select.appendChild(option)
+
+                    var option = document.createElement("option")
+                    option.value = 'r'
+                    option.innerHTML = 'Rusak'
+                    select.appendChild(option)
+
+                    var option = document.createElement("option")
+                    option.value = 'rb'
+                    option.innerHTML = 'Rusak Berat'
+                    select.appendChild(option)
+
+                    div_inner_sensor.appendChild(select)
+
+                    var br = document.createElement("br")
+                    div_inner_sensor.appendChild(br)
+                }
+                //END KEADAAN KOMPONEN
+
+                //START MERK KOMPONEN
+                for (var iter_inner_input = 0; iter_inner_input < default_jumlah_site; iter_inner_input++) {
+                    var input = document.createElement("input")
+                    input.name = `${kode_sensor_alat}_${iter_input}_${single_kode_sensor}_${iter_inner_input}_merk_performa_kompleks`
+                    input.id = `${kode_sensor_alat}_${iter_input}_${single_kode_sensor}_${iter_inner_input}_merk_performa_kompleks`
+                    input.type = 'text'
+                    div_inner_sensor.appendChild(input)
+                }
+                //END MERK KOMPONEN
+
+
+            }
+
+            div_performa.appendChild(div_inner_sensor)
+
+        }
+        div_ket.appendChild(div_performa)
+        div_induk.appendChild(div_ket)
+    }
+    //end generate input
+
+    //begin get data
+    var situs_marker = []
+	var xhttp = new XMLHttpRequest();
+	xhttp.onreadystatechange = function() {
+		if (this.readyState == 4 && this.status == 200) {
+			var alldata = this.responseText
+            var full_alldata_json = JSON.parse(alldata)
+            var alldata_json = full_alldata_json['data']
+            var stat_alldata = full_alldata_json['stat_alat']
+
+            if (alldata_json == null) {
+                alldata_json = []
+            }
+
+            //console.log("check data", full_alldata_json)
+
+            var checklist_set_jumlah = {}
+            document.getElementById('row_alat_tambahan').innerHTML = ''
+            for (var iter_alldata = 0; iter_alldata < alldata_json.length; iter_alldata++) {
+                var kode_alat_kompleks = alldata_json[iter_alldata]['Kode_alat']
+                checklist_set_jumlah[kode_alat_kompleks] = 'belum'
+            }
+            for (var iter_alldata = 0; iter_alldata < alldata_json.length; iter_alldata++) {
+                var urutan_alat = alldata_json[iter_alldata]['Urutan']
+                var kode_alat_kompleks = alldata_json[iter_alldata]['Kode_alat']
+                var merk_alat_kompleks = alldata_json[iter_alldata]['Merk']
+                var kategori_alat_kompleks = alldata_json[iter_alldata]['Kategori']
+                var status_alat_kompleks = alldata_json[iter_alldata]['Status']
+                var tahunpengadaan_alat_kompleks = alldata_json[iter_alldata]['Tahun_pengadaan']
+                var tahunkalibrasi_alat_kompleks = alldata_json[iter_alldata]['Tahun_kalibrasi']
+                var keterangan_alat_kompleks = alldata_json[iter_alldata]['Keterangan']
+                var jumlah_site_alat_kompleks = alldata_json[iter_alldata]['Jumlah_site']
+                var list_performa_alat_kompleks = alldata_json[iter_alldata]['Performa_list']
+
+
+                var nama_alat_kompleks = ''
+                try {
+                    nama_alat_kompleks = dict_kode_nama_alat[kode_alat_kompleks]
+                } catch (err) {
+                    console.log('iter kode nama tak ditemukan karena kodenya', kode_alat_kompleks)
+                    continue
+                }
+                
+                var iter_urutan_alat
+                try {
+                    iter_urutan_alat = dict_kode_iter[kode_alat_kompleks]
+                } catch (err) {
+                    console.log('iter urutan alat tak ditemukan karena kodenya', kode_alat_kompleks)
+                    continue
+                }
+
+                if (checklist_set_jumlah[kode_alat_kompleks] == 'belum') {
+                    var select = document.getElementById(`${kode_alat_kompleks}_jumlah_kompleks`)
+                    select.value = stat_alldata[kode_alat_kompleks]
+                    set_jumlah_alat_kompleks(kode_alat_kompleks, nama_alat_kompleks, iter_urutan_alat)
+                    checklist_set_jumlah[kode_alat_kompleks] = 'sudah'
+                }
+
+
+                try {
+                    var input = document.getElementById(`${kode_alat_kompleks}_${urutan_alat}_merk_kompleks`)
+                    input.value = merk_alat_kompleks
+                } catch (err) {
+                    console.log('err, filling input')
+                }
+
+                try {
+                    var select = document.getElementById(`${kode_alat_kompleks}_${urutan_alat}_kategori_kompleks`)
+                    select.value = kategori_alat_kompleks
+                } catch (err) {
+                    console.log('err, filling input')
+                }
+
+                try {
+                    var select = document.getElementById(`${kode_alat_kompleks}_${urutan_alat}_status_kompleks`)
+                    select.value = status_alat_kompleks
+                } catch (err) {
+                    console.log('err, filling input')
+                }
+
+                try {
+                    var input = document.getElementById(`${kode_alat_kompleks}_${urutan_alat}_tahunpengadaan_kompleks`)
+                    input.value = tahunpengadaan_alat_kompleks
+                } catch (err) {
+                    console.log('err, filling input')
+                }
+                
+                try {
+                    var input = document.getElementById(`${kode_alat_kompleks}_${urutan_alat}_tahunkalibrasi_kompleks`)
+                    input.value = tahunkalibrasi_alat_kompleks
+                } catch (err) {
+                    console.log('err, filling input')
+                }
+
+                try {
+                    var input = document.getElementById(`${kode_alat_kompleks}_${urutan_alat}_keterangan_kompleks`)
+                    input.value = keterangan_alat_kompleks
+                } catch (err) {
+                    console.log('err, filling input')
+                }
+                
+
+                /*if (jumlah_site_alat_kompleks > 5) {
+                    jumlah_site_alat_kompleks = 5
+                } else if (jumlah_site_alat_kompleks < 0) {
+                    jumlah_site_alat_kompleks = 0
+                }*/
+
+                var select = document.getElementById(`${kode_alat_kompleks}_${urutan_alat}_jumlah_site_kompleks`)
+                select.value = jumlah_site_alat_kompleks
+                set_jumlah_site(kode_alat_kompleks, urutan_alat, iter_urutan_alat)
+
+                for (var iter_performa = 0; iter_performa < list_performa_alat_kompleks.length; iter_performa++) {
+                    var kode_sensor = list_performa_alat_kompleks[iter_performa]['Kode_alat']
+                    var list_val_performa = list_performa_alat_kompleks[iter_performa]['Performa']
+                    var list_val_keadaan = list_performa_alat_kompleks[iter_performa]['Keadaan']
+                    var list_val_merk = list_performa_alat_kompleks[iter_performa]['Merk']
+                    for (var iter_performa_val = 0; iter_performa_val < jumlah_site_alat_kompleks; iter_performa_val++) {
+                        try {
+                            var input = document.getElementById(`${kode_alat_kompleks}_${urutan_alat}_${kode_sensor}_${iter_performa_val}_nilai_performa_kompleks`)
+                            input.value = list_val_performa[iter_performa_val]
+                        } catch (err) {
+                            console.log('err, filling input')
+                        }
+                        try {
+                            var input = document.getElementById(`${kode_alat_kompleks}_${urutan_alat}_${kode_sensor}_${iter_performa_val}_keadaan_performa_kompleks`)
+                            input.value = list_val_keadaan[iter_performa_val]
+                        } catch (err) {
+                            console.log('err, filling input')
+                        }
+                        try {
+                            var input = document.getElementById(`${kode_alat_kompleks}_${urutan_alat}_${kode_sensor}_${iter_performa_val}_merk_performa_kompleks`)
+                            input.value = list_val_merk[iter_performa_val]
+                        } catch (err) {
+                            console.log('err, filling input')
+                        }
+                    }
+                }
+                
+
+            }
+
+            //START UPDATE ALAT TAMBAHAN
+            var alldata_tambahan_json = full_alldata_json['data_tambahan']
+            if (alldata_tambahan_json == null) {
+                return
+            }
+            var dict_urutan_data_tambahan = {}
+            for (var iter_tambahan = 0; iter_tambahan < alldata_tambahan_json.length; iter_tambahan++) {
+                dict_urutan_data_tambahan[iter_tambahan] = alldata_tambahan_json[iter_tambahan]['Urutan']
+            }
+            for (var iter_tambahan = 0; iter_tambahan < alldata_tambahan_json.length; iter_tambahan++) {
+                var count_tambah_alat = real_count_tambah_alat
+                var idx = dict_urutan_data_tambahan[iter_tambahan]
+                
+                var nama_alat_update = alldata_tambahan_json[idx]["Nama_alat"]
+                var jumlah_alat_update = alldata_tambahan_json[idx]["Jumlah"]
+                var list_merk_update = alldata_tambahan_json[idx]["Merk"]
+                var list_tahunpengadaan_update = alldata_tambahan_json[idx]["Tahun_pengadaan"]
+                var list_tahunkalibrasi_update = alldata_tambahan_json[idx]["Tahun_kalibrasi"]
+                var list_status_update = alldata_tambahan_json[idx]["Status"]
+                var list_performa_update = alldata_tambahan_json[idx]["Performa"]
+                var list_keadaan_update = alldata_tambahan_json[idx]["Keadaan"]
+                var list_keterangan_update = alldata_tambahan_json[idx]["Keterangan"]
+
+                var div_row = document.getElementById("row_alat_tambahan")
+                var single_div_row = document.createElement("div")
+                single_div_row.style.border = "2px solid black"
+                single_div_row.style.margin = "1px"
+                single_div_row.style.padding = "1px"
+                id_single_div = `rowdiv_tambah_alat_${count_tambah_alat}`
+                single_div_row.id = id_single_div
+
+                var h3 = document.createElement("h3")
+                h3.innerHTML = 'Nama Alat'
+                single_div_row.appendChild(h3)
+
+                var input = document.createElement("input")
+                input.name = `nama_tambah_alat_${count_tambah_alat}`
+                input.id = `nama_tambah_alat_${count_tambah_alat}`
+                input.value = nama_alat_update
+                input.setAttribute("readonly", true)
+                single_div_row.appendChild(input)
+
+                var h3 = document.createElement("h3")
+                h3.innerHTML = 'Jumlah Alat'
+                single_div_row.appendChild(h3)
+
+                var select = document.createElement("select")
+                select.name = `jumlah_tambah_alat_${count_tambah_alat}`
+                select.id = `jumlah_tambah_alat_${count_tambah_alat}`
+                select.setAttribute("onChange", `ubah_total_alat_tambahan(${count_tambah_alat}, 'rowdiv_tambah_alat_inner_${count_tambah_alat}')`)
+
+                for (var iter_opsi = 1; iter_opsi < 11; iter_opsi++) {
+                    var opsi = document.createElement("option")
+                    opsi.value = iter_opsi
+                    opsi.innerHTML = iter_opsi
+                    select.appendChild(opsi)
+                }
+                select.value = jumlah_alat_update
+                single_div_row.appendChild(select)
+
+                var div_inner = document.createElement("div")
+                div_inner.id = `rowdiv_tambah_alat_inner_${count_tambah_alat}`
+                single_div_row.appendChild(div_inner)
+
+                var button = document.createElement('button')
+                button.style.backgroundColor = '#354259'
+                var img = document.createElement('img')
+                img.src = 'static_peralatan/img/x.svg'
+                button.appendChild(img)
+                button.setAttribute('onClick', `delete_tambahan_alat(${count_tambah_alat}, 'rowdiv_tambah_alat_${count_tambah_alat}')`)
+                single_div_row.appendChild(button)
+
+                var h3 = document.createElement("h3")
+                h3.innerHTML = 'Merk Alat'
+                div_inner.appendChild(h3)
+                for (var iter_merk = 0; iter_merk < jumlah_alat_update; iter_merk++) {
+                    var input = document.createElement("input")
+                    input.name = `merk_tambah_alat_${count_tambah_alat}_${iter_merk}`
+                    input.id = `merk_tambah_alat_${count_tambah_alat}_${iter_merk}`
+                    input.type = 'text'
+                    input.value = list_merk_update[iter_merk]
+                    div_inner.appendChild(input)
+                }
+
+                var h3 = document.createElement("h3")
+                h3.innerHTML = 'Status Alat'
+                div_inner.appendChild(h3)
+                for (var iter_status = 0; iter_status < jumlah_alat_update; iter_status++) {
+                    var select = document.createElement("select")
+                    select.name = `status_tambah_alat_${count_tambah_alat}_${iter_status}`
+                    select.id = `status_tambah_alat_${count_tambah_alat}_${iter_status}`
+                    
+                    var option = document.createElement('option')
+                    option.value = 'on'
+                    option.innerHTML = 'on'
+                    select.appendChild(option)
+
+                    var option = document.createElement('option')
+                    option.value = 'off'
+                    option.innerHTML = 'off'
+                    select.appendChild(option)
+                    select.value = list_status_update[iter_status]
+                    div_inner.appendChild(select)
+                }
+
+                var h3 = document.createElement("h3")
+                h3.innerHTML = 'Tahun Pengadaan Alat'
+                div_inner.appendChild(h3)
+                for (var iter_pengadaan = 0; iter_pengadaan < jumlah_alat_update; iter_pengadaan++) {
+                    var input = document.createElement("input")
+                    input.name = `tahunpengadaan_tambah_alat_${count_tambah_alat}_${iter_pengadaan}`
+                    input.id = `tahunpengadaan_tambah_alat_${count_tambah_alat}_${iter_pengadaan}`
+                    input.type = 'number'
+                    input.value = list_tahunpengadaan_update[iter_pengadaan]
+                    div_inner.appendChild(input)
+                }
+
+                var h3 = document.createElement("h3")
+                h3.innerHTML = 'Tahun Kalibrasi Alat'
+                div_inner.appendChild(h3)
+                for (var iter_kalibrasi = 0; iter_kalibrasi < jumlah_alat_update; iter_kalibrasi++) {
+                    var input = document.createElement("input")
+                    input.name = `tahunkalibrasi_tambah_alat_${count_tambah_alat}_${iter_kalibrasi}`
+                    input.id = `tahunkalibrasi_tambah_alat_${count_tambah_alat}_${iter_kalibrasi}`
+                    input.type = 'number'
+                    input.value = list_tahunkalibrasi_update[iter_kalibrasi]
+                    div_inner.appendChild(input)
+                }
+
+                var h3 = document.createElement("h3")
+                h3.innerHTML = 'Performa Alat'
+                div_inner.appendChild(h3)
+                for (var iter_performa = 0; iter_performa < jumlah_alat_update; iter_performa++) {
+                    var input = document.createElement("input")
+                    input.name = `performa_tambah_alat_${count_tambah_alat}_${iter_performa}`
+                    input.id = `performa_tambah_alat_${count_tambah_alat}_${iter_performa}`
+                    input.type = 'number'
+                    input.min = 0
+                    input.max = 100
+                    input.value = list_performa_update[iter_performa]
+                    div_inner.appendChild(input)
+                }
+
+                var h3 = document.createElement("h3")
+                h3.innerHTML = 'Keadaan Alat'
+                div_inner.appendChild(h3)
+                for (var iter_keadaan = 0; iter_keadaan < jumlah_alat_update; iter_keadaan++) {
+                    var select = document.createElement("select")
+                    select.name = `keadaan_tambah_alat_${count_tambah_alat}_${iter_keadaan}`
+                    select.id = `keadaan_tambah_alat_${count_tambah_alat}_${iter_keadaan}`
+                    
+                    var option = document.createElement('option')
+                    option.value = 'b'
+                    option.innerHTML = 'Baik'
+                    select.appendChild(option)
+
+                    var option = document.createElement('option')
+                    option.value = 'r'
+                    option.innerHTML = 'Rusak'
+                    select.appendChild(option)
+                    div_inner.appendChild(select)
+
+                    var option = document.createElement('option')
+                    option.value = 'rb'
+                    option.innerHTML = 'Rusak Berat'
+                    select.appendChild(option)
+                    select.value = list_keadaan_update[iter_keadaan]
+                    div_inner.appendChild(select)
+                }
+
+                var h3 = document.createElement("h3")
+                h3.innerHTML = 'Keterangan Alat'
+                div_inner.appendChild(h3)
+                for (var iter_keterangan = 0; iter_keterangan < jumlah_alat_update; iter_keterangan++) {
+                    var input = document.createElement("input")
+                    input.name = `keterangan_tambah_alat_${count_tambah_alat}_${iter_keterangan}`
+                    input.id = `keterangan_tambah_alat_${count_tambah_alat}_${iter_keterangan}`
+                    input.type = 'text'
+                    input.value = list_keterangan_update[iter_keterangan]
+                    div_inner.appendChild(input)
+                }
+
+                div_row.appendChild(single_div_row)
+                real_count_tambah_alat++
+            }
+            //END UPDATE ALAT TAMBAHAN
+        }
+    }
+
+    var kode_situs_selected = document.getElementById('situs').value
+    xhttp.open("GET", `get_data_alat/${kode_situs_selected}`, true);
+	xhttp.send();
+}
+
+function set_jumlah_site(kode_alat_kompleks, urutan_sensor, urutan_alat_kompleks) {
+    var jumlah_site = document.getElementById(`${kode_alat_kompleks}_${urutan_sensor}_jumlah_site_kompleks`).value
+    //console.log('urutan sensor dan jumlah site adalah', urutan_sensor, jumlah_site, urutan_alat_kompleks)
+    //console.log('param =>', kode_alat_kompleks, urutan_sensor, urutan_alat_kompleks)
+
+    var div_performa_sensor = document.getElementById(`${kode_alat_kompleks}_${urutan_sensor}_div_inner_performa_sensor_alat_kompleks`)
+    div_performa_sensor.innerHTML = ''
+
+    var list_data_sensor = alldata_alat[urutan_alat_kompleks]['List_sensor']
+    for (var iter_site = 0; iter_site < list_data_sensor.length; iter_site++) {
+        var single_nama_sensor = list_data_sensor[iter_site]['Nama_alat']
+        var single_kode_sensor = list_data_sensor[iter_site]['Kode_alat']
+
+        var h3 = document.createElement("h3")
+        h3.innerHTML = `Performa, keadaan, dan merk ${single_nama_sensor}`
+        div_performa_sensor.appendChild(h3)
+
+        for (var iter_inner_input = 0; iter_inner_input < jumlah_site; iter_inner_input++) {
+            var input = document.createElement("input")
+            input.name = `${kode_alat_kompleks}_${urutan_sensor}_${single_kode_sensor}_${iter_inner_input}_nilai_performa_kompleks`
+            input.id = `${kode_alat_kompleks}_${urutan_sensor}_${single_kode_sensor}_${iter_inner_input}_nilai_performa_kompleks`
+            input.type = 'number'
+            input.min = 0
+            input.max = 100
+            div_performa_sensor.appendChild(input)
+        }
+
+        var br = document.createElement("br")
+        div_performa_sensor.appendChild(br)
+
+        //START KEADAAN KOMPONEN
+        for (var iter_inner_input = 0; iter_inner_input < jumlah_site; iter_inner_input++) {
+            var select = document.createElement("select")
+            select.name = `${kode_alat_kompleks}_${urutan_sensor}_${single_kode_sensor}_${iter_inner_input}_keadaan_performa_kompleks`
+            select.id = `${kode_alat_kompleks}_${urutan_sensor}_${single_kode_sensor}_${iter_inner_input}_keadaan_performa_kompleks`
+                   
+            var option = document.createElement("option")
+            option.value = 'nil'
+            option.innerHTML = 'Tidak ada'
+            select.appendChild(option)
+
+            var option = document.createElement("option")
+            option.value = 'b'
+            option.innerHTML = 'Baik'
+            select.appendChild(option)
+
+            var option = document.createElement("option")
+            option.value = 'r'
+            option.innerHTML = 'Rusak'
+            select.appendChild(option)
+
+            var option = document.createElement("option")
+            option.value = 'rb'
+            option.innerHTML = 'Rusak Berat'
+            select.appendChild(option)
+                    
+            div_performa_sensor.appendChild(select)
+
+            var br = document.createElement("br")
+            div_performa_sensor.appendChild(br)
+        }
+        //END KEADAAN KOMPONEN
+
+        //START MERK KOMPONEN
+        for (var iter_inner_input = 0; iter_inner_input < jumlah_site; iter_inner_input++) {
+            var input = document.createElement("input")
+            input.name = `${kode_alat_kompleks}_${urutan_sensor}_${single_kode_sensor}_${iter_inner_input}_merk_performa_kompleks`
+            input.id = `${kode_alat_kompleks}_${urutan_sensor}_${single_kode_sensor}_${iter_inner_input}_merk_performa_kompleks`
+            input.type = 'text'
+            var br = document.createElement("br")
+            div_performa_sensor.appendChild(br)
+            div_performa_sensor.appendChild(input)
+        }
+        //END MERK KOMPONEN
+    }
+}
+
+function set_jumlah_alat_kompleks(kode_alat, nama_alat, urutan_alat_kompleks) {
+    var default_jumlah_site = 1
+
+    var jumlah_alat = document.getElementById(`${kode_alat}_jumlah_kompleks`).value
+    var kategori_sensor = alldata_alat[urutan_alat_kompleks]['List_jenis']
+    var list_data_sensor = alldata_alat[urutan_alat_kompleks]['List_sensor']
+    
+    var div = document.getElementById(`${kode_alat}_div_merk_kompleks`)
+    div.innerHTML = ''
+
+    var h3 = document.createElement("h3")
+    h3.innerHTML = `Merk ${nama_alat}`
+    div.appendChild(h3)
+    for (var iter_input = 0; iter_input < jumlah_alat; iter_input++) {
+        var input = document.createElement("input")
+        input.name = `${kode_alat}_${iter_input}_merk_kompleks`
+        input.id = `${kode_alat}_${iter_input}_merk_kompleks`
+        input.type = "text"
+        div.appendChild(input)
+        if (iter_input != jumlah_alat-1) {
+            var br = document.createElement("br")
+            div.appendChild(br)
+        }
+    }
+
+    var div = document.getElementById(`${kode_alat}_div_kategori_kompleks`)
+    div.innerHTML = ''
+
+    var h3 = document.createElement("h3")
+    h3.innerHTML = `Kategori ${nama_alat}`
+    div.appendChild(h3)
+
+    for (var iter_input = 0; iter_input < jumlah_alat; iter_input++) {
+        var select = document.createElement("select")
+        select.name = `${kode_alat}_${iter_input}_kategori_kompleks`
+        select.id = `${kode_alat}_${iter_input}_kategori_kompleks`
+        for (var iter_opsi = 0; iter_opsi < kategori_sensor.length; iter_opsi++) {
+            var opsi = document.createElement("option")
+            opsi.value = kategori_sensor[iter_opsi]
+            opsi.innerHTML = kategori_sensor[iter_opsi]
+            select.appendChild(opsi)
+        }
+        div.appendChild(select)
+        if (iter_input != jumlah_alat-1) {
+            var br = document.createElement("br")
+            div.appendChild(br)
+        }
+    }
+
+
+    var div = document.getElementById(`${kode_alat}_div_status_kompleks`)
+    div.innerHTML = ''
+
+    var h3 = document.createElement("h3")
+    h3.innerHTML = `Status ${nama_alat}`
+    div.appendChild(h3)
+
+    for (var iter_input = 0; iter_input < jumlah_alat; iter_input++) {
+        var select = document.createElement("select")
+        select.name = `${kode_alat}_${iter_input}_status_kompleks`
+        select.id = `${kode_alat}_${iter_input}_status_kompleks`
+        for (var iter_opsi = 0; iter_opsi < list_status.length; iter_opsi++) {
+            var opsi = document.createElement("option")
+            opsi.value = list_status[iter_opsi]
+            opsi.innerHTML = list_status_text[iter_opsi]
+            select.appendChild(opsi)
+        }
+        div.appendChild(select)
+        if (iter_input != jumlah_alat-1) {
+            var br = document.createElement("br")
+            div.appendChild(br)
+        }
+    }
+
+    //TAMBAHAN FORM
+    var div = document.getElementById(`${kode_alat}_div_tahunpengadaan_kompleks`)
+    div.innerHTML = ''
+
+    var h3 = document.createElement("h3")
+    h3.innerHTML = `Tahun Pengadaan ${nama_alat}`
+    div.appendChild(h3)
+
+    for (var iter_input = 0; iter_input < jumlah_alat; iter_input++) {
+        var input = document.createElement("input")
+        input.name = `${kode_alat}_${iter_input}_tahunpengadaan_kompleks`
+        input.id = `${kode_alat}_${iter_input}_tahunpengadaan_kompleks`
+        input.type = "number"
+        div.appendChild(input)
+        if (iter_input != jumlah_alat-1) {
+            var br = document.createElement("br")
+            div.appendChild(br)
+        }
+    }
+
+    var div = document.getElementById(`${kode_alat}_div_tahunkalibrasi_kompleks`)
+    div.innerHTML = ''
+
+    var h3 = document.createElement("h3")
+    h3.innerHTML = `Tahun Kalibrasi ${nama_alat}`
+    div.appendChild(h3)
+
+    for (var iter_input = 0; iter_input < jumlah_alat; iter_input++) {
+        var input = document.createElement("input")
+        input.name = `${kode_alat}_${iter_input}_tahunkalibrasi_kompleks`
+        input.id = `${kode_alat}_${iter_input}_tahunkalibrasi_kompleks`
+        input.type = "number"
+        div.appendChild(input)
+        if (iter_input != jumlah_alat-1) {
+            var br = document.createElement("br")
+            div.appendChild(br)
+        }
+    }
+    //END TAMBAHAN FORM
+
+    var div = document.getElementById(`${kode_alat}_div_keterangan_kompleks`)
+    div.innerHTML = ''
+
+    var h3 = document.createElement("h3")
+    h3.innerHTML = `Keterangan ${nama_alat}`
+    div.appendChild(h3)
+
+    for (var iter_input = 0; iter_input < jumlah_alat; iter_input++) {
+        var input = document.createElement("input")
+        input.name = `${kode_alat}_${iter_input}_keterangan_kompleks`
+        input.id = `${kode_alat}_${iter_input}_keterangan_kompleks`
+        input.type = "text"
+        div.appendChild(input)
+        if (iter_input != jumlah_alat-1) {
+            var br = document.createElement("br")
+            div.appendChild(br)
+        }
+    }
+
+    var div = document.getElementById(`${kode_alat}_div_performa_kompleks`)
+    div.innerHTML = ''
+
+    for (var iter_input = 0; iter_input < jumlah_alat; iter_input++) {
+        var h3 = document.createElement("h3")
+        h3.innerHTML = `Jumlah site komponen ${nama_alat} ${iter_input+1}`
+        div.appendChild(h3)
+
+        var select = document.createElement("select")
+        select.name = `${kode_alat}_${iter_input}_jumlah_site_kompleks`
+        select.id = `${kode_alat}_${iter_input}_jumlah_site_kompleks`
+
+        var total_opsi = 6
+        if (kode_alat == "LLWAS") {
+            total_opsi = 48
+        }
+        for (var iter_opsi = 1; iter_opsi < total_opsi; iter_opsi++) {
+            var opsi = document.createElement("option")
+            opsi.value = iter_opsi
+            opsi.innerHTML = iter_opsi
+            select.appendChild(opsi)
+        }
+        select.value = default_jumlah_site
+        select.setAttribute('onChange', `set_jumlah_site('${kode_alat}',${iter_input}, ${urutan_alat_kompleks})`)
+        div.appendChild(select)
+
+        var div_inner_sensor = document.createElement("div")
+        div_inner_sensor.style.border = '2px solid black'
+        div_inner_sensor.style.borderRadius = '5px'
+        div_inner_sensor.id = `${kode_alat}_${iter_input}_div_inner_performa_sensor_alat_kompleks`
+        for (var iter_sensor = 0; iter_sensor < list_data_sensor.length; iter_sensor++) {
+            var single_nama_sensor = list_data_sensor[iter_sensor]['Nama_alat']
+            var single_kode_sensor = list_data_sensor[iter_sensor]['Kode_alat']
+
+            var h3 = document.createElement("h3")
+            h3.innerHTML = `Performa, keadaan, dan merk ${single_nama_sensor}`
+            div_inner_sensor.appendChild(h3)
+
+            for (var iter_inner_input = 0; iter_inner_input < default_jumlah_site; iter_inner_input++) {
+                var input = document.createElement("input")
+                input.name = `${kode_alat}_${iter_input}_${single_kode_sensor}_${iter_inner_input}_nilai_performa_kompleks`
+                input.id = `${kode_alat}_${iter_input}_${single_kode_sensor}_${iter_inner_input}_nilai_performa_kompleks`
+                input.type = 'number'
+                input.min = 0
+                input.max = 100
+                div_inner_sensor.appendChild(input)
+            }
+            //START KEADAAN KOMPONEN
+            for (var iter_inner_input = 0; iter_inner_input < default_jumlah_site; iter_inner_input++) {
+                var select = document.createElement("select")
+                select.name = `${kode_alat}_${iter_input}_${single_kode_sensor}_${iter_inner_input}_keadaan_performa_kompleks`
+                select.id = `${kode_alat}_${iter_input}_${single_kode_sensor}_${iter_inner_input}_keadaan_performa_kompleks`
+                    
+                var option = document.createElement("option")
+                option.value = 'nil'
+                option.innerHTML = 'Tidak ada'
+                select.appendChild(option)
+
+                var option = document.createElement("option")
+                option.value = 'b'
+                option.innerHTML = 'Baik'
+                select.appendChild(option)
+
+                var option = document.createElement("option")
+                option.value = 'r'
+                option.innerHTML = 'Rusak'
+                select.appendChild(option)
+
+                var option = document.createElement("option")
+                option.value = 'rb'
+                option.innerHTML = 'Rusak Berat'
+                select.appendChild(option)
+                        
+                div_inner_sensor.appendChild(select)
+
+                var br = document.createElement("br")
+                div_inner_sensor.appendChild(br)
+            }
+            //END KEADAAN KOMPONEN
+
+            //START MERK KOMPONEN
+            for (var iter_inner_input = 0; iter_inner_input < default_jumlah_site; iter_inner_input++) {
+                var input = document.createElement("input")
+                input.name = `${kode_alat}_${iter_input}_${single_kode_sensor}_${iter_inner_input}_merk_performa_kompleks`
+                input.id = `${kode_alat}_${iter_input}_${single_kode_sensor}_${iter_inner_input}_merk_performa_kompleks`
+                input.type = 'text'
+                var br = document.createElement("br")
+                div_inner_sensor.appendChild(br)
+                div_inner_sensor.appendChild(input)
+            }
+            //END MERK KOMPONEN
+        }
+
+        div.appendChild(div_inner_sensor)
+    }
+
+}
+
+/*function get_data_kompleks() {
+    console.log('contoh promise')
+}
+
+var promise_init = new Promise(update_set_alat_kompleks)
+promise_init.then(get_data_kompleks) */
+
+update_set_alat_kompleks()
+</script>
+
+
+<script>
+
+document.getElementById('close-btn').addEventListener('click', function() {
+    document.getElementById('overlay').classList.remove('is-visible');
+    document.getElementById('modal').classList.remove('is-visible');
+  });
+
+  document.getElementById('close-btn_manage_situs').addEventListener('click', function() {
+    document.getElementById('overlay_manage_situs').classList.remove('is-visible');
+    document.getElementById('modal_manage_situs').classList.remove('is-visible');
+  });
+
+  document.getElementById('close-btn_manage_user').addEventListener('click', function() {
+    document.getElementById('overlay_manage_user').classList.remove('is-visible');
+    document.getElementById('modal_manage_user').classList.remove('is-visible');
+  });
+
+  document.getElementById('close-btn_edit_situs').addEventListener('click', function() {
+    document.getElementById('overlay_edit_situs').classList.remove('is-visible');
+    document.getElementById('modal_edit_situs').classList.remove('is-visible');
+  });
+
+  document.getElementById('close-btn_edit_user').addEventListener('click', function() {
+    document.getElementById('overlay_edit_user').classList.remove('is-visible');
+    document.getElementById('modal_edit_user').classList.remove('is-visible');
+  });
+
+  document.getElementById('overlay').addEventListener('click', function() {
+    document.getElementById('overlay').classList.remove('is-visible');
+    document.getElementById('modal').classList.remove('is-visible');
+  });
+
+  document.getElementById('overlay_manage_situs').addEventListener('click', function() {
+    document.getElementById('overlay_manage_situs').classList.remove('is-visible');
+    document.getElementById('modal_manage_situs').classList.remove('is-visible');
+  });
+
+  document.getElementById('overlay_edit_situs').addEventListener('click', function() {
+    document.getElementById('overlay_edit_situs').classList.remove('is-visible');
+    document.getElementById('modal_edit_situs').classList.remove('is-visible');
+  });
+
+  document.getElementById('overlay_edit_user').addEventListener('click', function() {
+    document.getElementById('overlay_edit_user').classList.remove('is-visible');
+    document.getElementById('modal_edit_user').classList.remove('is-visible');
+  });
+
+  document.getElementById('overlay_manage_user').addEventListener('click', function() {
+    document.getElementById('overlay_manage_user').classList.remove('is-visible');
+    document.getElementById('modal_manage_user').classList.remove('is-visible');
+  });
+
+
+  /*document.getElementById('close-btn_sensor').addEventListener('click', function() {
+    document.getElementById('overlay').classList.remove('is-visible');
+    document.getElementById('modal_sensor').classList.remove('is-visible');
+  });*/
+
+</script>
+
+<script>
+
+function click_performa() {
+    document.getElementById('overlay_performa').classList.add('is-visible')
+    document.getElementById('modal_performa').classList.add('is-visible')
+}
+
+function click_site_backup() {
+    var kode = this.options.kode_situs
+    //var nama = dict_kode_nama_alat[kode]
+
+    //console.log('cek nama', kode, nama)
+
+    var xhttp = new XMLHttpRequest();
+	xhttp.onreadystatechange = function() {
+        var alldata_json
+        var alldata = this.responseText
+        try {
+            alldata_json = JSON.parse(alldata)
+        } catch (err) {
+            //act for null data
+            return
+        }
+
+        if (alldata_json['status'] != "ok") {
+            //act for null data
+            return
+        }
+
+        var alldata_data = alldata_json['data']
+
+        var dict_jumlah_alat = {}
+        var dict_urutan_keterangan = {}
+        var dict_urutan_kategori = {}
+        var dict_urutan_merk = {}
+        var dict_urutan_jumlahsite = {}
+        dict_urutan_performasensor = {}
+        for (var iter_data = 0; iter_data < alldata_data.length; iter_data++) {
+            dict_jumlah_alat[alldata_data[iter_data]['Kode_alat']] += 1
+            if (isNaN(dict_jumlah_alat[alldata_data[iter_data]['Kode_alat']])) {
+                dict_jumlah_alat[alldata_data[iter_data]['Kode_alat']] = 1
+            }
+            var single_urutan = alldata_data[iter_data]['Urutan']
+            if (dict_urutan_keterangan[single_urutan] == undefined) {
+                dict_urutan_keterangan[single_urutan] = {}
+            }
+            if (dict_urutan_kategori[single_urutan] == undefined) {
+                dict_urutan_kategori[single_urutan] = {}
+            }
+            if (dict_urutan_merk[single_urutan] == undefined) {
+                dict_urutan_merk[single_urutan] = {}
+            }
+            if (dict_urutan_jumlahsite[single_urutan] == undefined) {
+                dict_urutan_jumlahsite[single_urutan] = {}
+            }
+            if (dict_urutan_performasensor[single_urutan] == undefined) {
+                dict_urutan_performasensor[single_urutan] = {}
+            }
+            dict_urutan_keterangan[single_urutan][alldata_data[iter_data]['Kode_alat']] = alldata_data[iter_data]['Keterangan']
+            dict_urutan_kategori[single_urutan][alldata_data[iter_data]['Kode_alat']] = alldata_data[iter_data]['Kategori']
+            dict_urutan_merk[single_urutan][alldata_data[iter_data]['Kode_alat']] = alldata_data[iter_data]['Merk']
+            dict_urutan_jumlahsite[single_urutan][alldata_data[iter_data]['Kode_alat']] = alldata_data[iter_data]['Jumlah_site']
+
+            var list_data_performa_sensor = alldata_data[iter_data]['Performa_list']
+            for (var iter_p = 0; iter_p < list_data_performa_sensor.length; iter_p++) {
+                if (iter_p == 0) {
+                    dict_urutan_performasensor[single_urutan][alldata_data[iter_data]['Kode_alat']] = {}
+                }
+                dict_urutan_performasensor[single_urutan][alldata_data[iter_data]['Kode_alat']][list_data_performa_sensor[iter_p]['Kode_alat']] = {}
+                dict_urutan_performasensor[single_urutan][alldata_data[iter_data]['Kode_alat']][list_data_performa_sensor[iter_p]['Kode_alat']]['nama'] = list_data_performa_sensor[iter_p]['Nama_alat']
+                dict_urutan_performasensor[single_urutan][alldata_data[iter_data]['Kode_alat']][list_data_performa_sensor[iter_p]['Kode_alat']]['performa'] = list_data_performa_sensor[iter_p]['Performa']
+            }
+        }
+
+        console.log('cek alldata_data', alldata_data)
+        console.log("cek dict alat", dict_jumlah_alat)
+
+        var keys_alat = Object.keys(dict_jumlah_alat)
+
+        console.log('cek dict baru', dict_urutan_performasensor, dict_jumlah_alat)
+
+        /*var dict_list_kategori_alat = {}
+        for (var iter_data = 0; iter_data < keys_alat.length; alldata_data++) {
+            var single_jumlah = dict_jumlah_alat[keys_alat[iter_data]]
+            for (var iter_data_akses = 0; iter_data_akses < single_jumlah; iter_data_akses++) {
+
+                for () {
+
+                }
+
+            }
+        }*/
+
+        console.log('kode situs dan data', kode, alldata_json, alldata_json['status'])
+
+        var div_status = document.getElementById("modal_status_alat")
+        div_status.innerHTML = ""
+
+        var h3 = document.createElement("h3")
+        h3.innerHTML = `Status Peralatan ${kode}`
+        div_status.appendChild(h3)
+
+        for (var iter_stat_alat = 0; iter_stat_alat < keys_alat.length; iter_stat_alat++) {
+            var single_jumlah = dict_jumlah_alat[keys_alat[iter_data]]
+
+            var table = document.createElement('table')
+            table.style.border = '2px solid black'
+            table.style.margin = '15px'
+            
+            var tr = document.createElement('tr')
+            var td = document.createElement('td')
+            td.innerHTML = "Nama alat"
+            tr.appendChild(td)
+            var td = document.createElement('td')
+            td.innerHTML = ''
+            tr.appendChild(td)
+            var td = document.createElement('td')
+            td.innerHTML = keys_alat[iter_stat_alat]
+            tr.appendChild(td)
+            table.append(tr)
+
+            var tr = document.createElement('tr')
+            var td = document.createElement('td')
+            td.innerHTML = "Jumlah alat"
+            tr.appendChild(td)
+            var td = document.createElement('td')
+            td.innerHTML = ''
+            tr.appendChild(td)
+            var td = document.createElement('td')
+            td.innerHTML = dict_jumlah_alat[keys_alat[iter_stat_alat]]
+            tr.appendChild(td)
+            table.append(tr)
+
+            //build string merk
+            var str_merk = ''
+            for (var iter_data_inner = 0; iter_data_inner < dict_jumlah_alat[keys_alat[iter_stat_alat]]; iter_data_inner++) {
+                var single_merk = '-'
+                try {
+                    single_merk = dict_urutan_merk[iter_data_inner][keys_alat[iter_stat_alat]]
+                } catch (err) {
+                    single_merk = '-'
+                }
+                str_merk += single_merk
+                if (iter_data_inner != dict_jumlah_alat[keys_alat[iter_stat_alat]]-1) {
+                    str_merk += '/'
+                }
+            }
+            var tr = document.createElement('tr')
+            var td = document.createElement('td')
+            td.innerHTML = "Merk alat"
+            tr.appendChild(td)
+            var td = document.createElement('td')
+            td.innerHTML = ''
+            tr.appendChild(td)
+            var td = document.createElement('td')
+            td.innerHTML = str_merk
+            tr.appendChild(td)
+            table.append(tr)
+
+            //build string kategori
+            var str_kategori = ''
+            for (var iter_data_inner = 0; iter_data_inner < dict_jumlah_alat[keys_alat[iter_stat_alat]]; iter_data_inner++) {
+                var single_kategori = '-'
+                try {
+                    single_kategori = dict_urutan_kategori[iter_data_inner][keys_alat[iter_stat_alat]]
+                } catch (err) {
+                    single_kategori = '-'
+                }
+                str_kategori += single_kategori
+                if (iter_data_inner != dict_jumlah_alat[keys_alat[iter_stat_alat]]-1) {
+                    str_kategori += '/'
+                }
+            }
+            var tr = document.createElement('tr')
+            var td = document.createElement('td')
+            td.innerHTML = "Kategori alat"
+            tr.appendChild(td)
+            var td = document.createElement('td')
+            td.innerHTML = ''
+            tr.appendChild(td)
+            var td = document.createElement('td')
+            td.innerHTML = str_kategori
+            tr.appendChild(td)
+            table.append(tr)
+
+            //build string keterangan
+            var str_keterangan = ''
+            for (var iter_data_inner = 0; iter_data_inner < dict_jumlah_alat[keys_alat[iter_stat_alat]]; iter_data_inner++) {
+                var single_keterangan = '-'
+                try {
+                    single_keterangan = dict_urutan_keterangan[iter_data_inner][keys_alat[iter_stat_alat]]
+                } catch (err) {
+                    single_keterangan = '-'
+                }
+                str_keterangan += single_keterangan
+                if (iter_data_inner != dict_jumlah_alat[keys_alat[iter_stat_alat]]-1) {
+                    str_keterangan += '/'
+                }
+            }
+            var tr = document.createElement('tr')
+            var td = document.createElement('td')
+            td.innerHTML = "Keterangan alat"
+            tr.appendChild(td)
+            var td = document.createElement('td')
+            td.innerHTML = ''
+            tr.appendChild(td)
+            var td = document.createElement('td')
+            td.innerHTML = str_keterangan
+            tr.appendChild(td)
+            table.append(tr)
+
+            //build string jumlah site
+            var str_jumlah_site = ''
+            for (var iter_data_inner = 0; iter_data_inner < dict_jumlah_alat[keys_alat[iter_stat_alat]]; iter_data_inner++) {
+                var single_jumlah_site= '-'
+                try {
+                    single_jumlah_site = dict_urutan_jumlahsite[iter_data_inner][keys_alat[iter_stat_alat]]
+                } catch (err) {
+                    single_jumlah_site = '-'
+                }
+                str_jumlah_site += single_jumlah_site
+                if (iter_data_inner != dict_jumlah_alat[keys_alat[iter_stat_alat]]-1) {
+                    str_jumlah_site += '/'
+                }
+            }
+            var tr = document.createElement('tr')
+            var td = document.createElement('td')
+            td.innerHTML = "Jumlah site"
+            tr.appendChild(td)
+            var td = document.createElement('td')
+            td.innerHTML = ''
+            tr.appendChild(td)
+            var td = document.createElement('td')
+            td.innerHTML = str_jumlah_site
+            tr.appendChild(td)
+            table.append(tr)
+
+            var tr = document.createElement('tr')
+            var td = document.createElement('td')
+            td.innerHTML = "<b>Performa</b>"
+            tr.appendChild(td)
+            var td = document.createElement('td')
+            td.innerHTML = ''
+            tr.appendChild(td)
+            var td = document.createElement('td')
+            td.innerHTML = ''
+            tr.appendChild(td)
+            table.append(tr)
+
+            //for performa
+            var all_stat_performa = {}
+            for (var iter_data_inner = 0; iter_data_inner < dict_jumlah_alat[keys_alat[iter_stat_alat]]; iter_data_inner++) {
+                var stat_performa = []
+                try {
+                    stat_performa = dict_urutan_performasensor[iter_data_inner][keys_alat[iter_stat_alat]]
+                } catch (err) {
+                    break
+                }
+                var list_stat_nama = Object.keys(stat_performa)
+                for (var iter_p_inner = 0; iter_p_inner < list_stat_nama.length; iter_p_inner++) {
+                    var nama_sensor_inner = stat_performa[list_stat_nama[iter_p_inner]]['nama']
+                    var list_nilai_p = stat_performa[list_stat_nama[iter_p_inner]]['performa']
+                    //build string nilai performa sensor
+                    var frag_str_performa = ''
+                    for (var iter_p_list = 0; iter_p_list < list_nilai_p.length; iter_p_list++) {
+                        frag_str_performa += list_nilai_p[iter_p_list]
+                        if (iter_p_list != list_nilai_p.length-1) {
+                            frag_str_performa += ','
+                        }
+                    }
+                    if (all_stat_performa[list_stat_nama[iter_p_inner]] == undefined) {
+                        all_stat_performa[list_stat_nama[iter_p_inner]] = frag_str_performa
+                    } else {
+                        all_stat_performa[list_stat_nama[iter_p_inner]] += '/'+frag_str_performa
+                    }
+                }
+            }
+
+            var all_keys_sensor = Object.keys(all_stat_performa)
+            for (var iter_key = 0; iter_key < all_keys_sensor.length; iter_key++) {
+                var tr = document.createElement('tr')
+                var td = document.createElement('td')
+                td.innerHTML = all_keys_sensor[iter_key]
+                tr.appendChild(td)
+                var td = document.createElement('td')
+                td.innerHTML = ''
+                tr.appendChild(td)
+                var td = document.createElement('td')
+                td.innerHTML = all_stat_performa[all_keys_sensor[iter_key]]
+                tr.appendChild(td)
+                table.append(tr)
+            }
+
+            //console.log('cek str performa', all_stat_performa)
+
+            //console.log('cek uji', dict_urutan_performasensor[iter_stat_alat][keys_alat[iter_stat_alat]], iter_stat_alat, keys_alat[iter_stat_alat])
+            //console.log("check dict performa", dict_urutan_performasensor, iter_stat_alat, keys_alat[iter_stat_alat])
+            //var all_keys_sensor = Object.keys(dict_urutan_performasensor[iter_stat_alat][keys_alat[iter_stat_alat]])
+            //console.log('semua kunci sensor', all_keys_sensor)
+            
+
+            div_status.appendChild(table)
+        }
+
+
+
+
+
+//        var table_data = document.createElement("table")
+//        table_data.style.border = '2px solid black'
+//        
+//        var tr = document.createElement("tr")
+//        var td = document.createElement("td")
+//        td.innerHTML = 
+
+
+        document.getElementById('overlay').classList.add('is-visible')
+        document.getElementById('modal').classList.add('is-visible')
+    }
+
+    xhttp.open("GET", `get_data_alat/${kode}`, true);
+	xhttp.send();
+}
+
+</script>
+
+<script>
+    function update_to_db() {
+        var send_data = {}
+        var situs = document.getElementById('situs').value
+        send_data['situs'] = situs
+        send_data['alat'] = []
+
+        for (var iter_alldata = 0; iter_alldata < alldata_alat.length; iter_alldata++) {
+            var data = {}
+            var single_alldata = alldata_alat[iter_alldata]
+            var single_all_sensor = single_alldata['List_sensor']
+            var jumlah_alat = 1
+            
+            try {
+                jumlah_alat = parseInt(document.getElementById(`${single_alldata['Kode_alat']}_jumlah_kompleks`).value)
+            } catch (err) {
+                jumlah_alat = 1
+            }
+            data['jumlah_alat'] = jumlah_alat
+            data['kode_alat'] = single_alldata['Kode_alat']
+            data['nama_alat'] = single_alldata['Nama_alat']
+
+            var arr_merk = []
+            for (var iter_jumlah = 0; iter_jumlah < jumlah_alat; iter_jumlah++) {
+                var single_merk = ''
+                try {
+                    single_merk = document.getElementById(`${single_alldata['Kode_alat']}_${iter_jumlah}_merk_kompleks`).value
+                } catch (err) {
+                    single_merk = ''
+                }
+                arr_merk.push(single_merk)
+            }
+            data['merk'] = arr_merk
+
+            var arr_kategori = []
+            for (var iter_jumlah = 0; iter_jumlah < jumlah_alat; iter_jumlah++) {
+                var single_kategori = ''
+                try {
+                    single_kategori = document.getElementById(`${single_alldata['Kode_alat']}_${iter_jumlah}_kategori_kompleks`).value
+                } catch (err) {
+                    single_kategori = ''
+                }
+                arr_kategori.push(single_kategori)
+            }
+            data['kategori'] = arr_kategori
+
+            var arr_status = []
+            for (var iter_jumlah = 0; iter_jumlah < jumlah_alat; iter_jumlah++) {
+                var single_status = ''
+                try {
+                    single_status = document.getElementById(`${single_alldata['Kode_alat']}_${iter_jumlah}_status_kompleks`).value
+                } catch (err) {
+                    single_status = 'off'
+                }
+                arr_status.push(single_status)
+            }
+            data['status'] = arr_status
+
+            var arr_keterangan = []
+            for (var iter_jumlah = 0; iter_jumlah < jumlah_alat; iter_jumlah++) {
+                var single_keterangan = ''
+                try {
+                    single_keterangan = document.getElementById(`${single_alldata['Kode_alat']}_${iter_jumlah}_keterangan_kompleks`).value
+                } catch (err) {
+                    single_keterangan = ''
+                }
+                arr_keterangan.push(single_keterangan)
+            }
+            data['keterangan'] = arr_keterangan
+            
+            var arr_jumlah_site = []
+            for (var iter_jumlah = 0; iter_jumlah < jumlah_alat; iter_jumlah++) {
+                var single_jumlah_site = 0
+                try {
+                    single_jumlah_site = parseInt(document.getElementById(`${single_alldata['Kode_alat']}_${iter_jumlah}_jumlah_site_kompleks`).value)
+                } catch (err) {
+                    single_jumlah_site = 0
+                }
+                arr_jumlah_site.push(single_jumlah_site)
+            }
+            data['jumlah_site'] = arr_jumlah_site
+
+            var arr_tahun_pengadaan = []
+            for (var iter_jumlah = 0; iter_jumlah < jumlah_alat; iter_jumlah++) {
+                var single_jumlah_site = 0
+                try {
+                    single_tahun_pengadaan = parseInt(document.getElementById(`${single_alldata['Kode_alat']}_${iter_jumlah}_tahunpengadaan_kompleks`).value)
+                } catch (err) {
+                    single_tahun_pengadaan = 0
+                }
+                arr_tahun_pengadaan.push(single_tahun_pengadaan)
+            }
+            data['tahun_pengadaan'] = arr_tahun_pengadaan
+
+            var arr_tahun_kalibrasi = []
+            for (var iter_jumlah = 0; iter_jumlah < jumlah_alat; iter_jumlah++) {
+                var single_jumlah_site = 0
+                try {
+                    single_tahun_kalibrasi = parseInt(document.getElementById(`${single_alldata['Kode_alat']}_${iter_jumlah}_tahunkalibrasi_kompleks`).value)
+                } catch (err) {
+                    single_tahun_kalibrasi = 0
+                }
+                arr_tahun_kalibrasi.push(single_tahun_kalibrasi)
+            }
+            data['tahun_kalibrasi'] = arr_tahun_kalibrasi
+
+            var arr_dict_sensor = []
+            for (var iter_jumlah = 0; iter_jumlah < jumlah_alat; iter_jumlah++) {
+                var single_jumlah_site = arr_jumlah_site[iter_jumlah]
+                var single_arr_dict_sensor = []
+                for (var iter_single_all_sensor = 0; iter_single_all_sensor < single_all_sensor.length; iter_single_all_sensor++) {
+                    var dict_sensor = {}
+                    var single_kode_sensor = single_all_sensor[iter_single_all_sensor]['Kode_alat']
+                    var single_nama_sensor = single_all_sensor[iter_single_all_sensor]['Nama_alat']
+                    dict_sensor['Kode_alat'] = single_kode_sensor
+                    dict_sensor['Nama_alat'] = single_nama_sensor
+                    var list_performa_sensor = []
+                    var list_keadaan_sensor = []
+                    var list_merk_sensor = []
+                    for (var iter_jumlah_site = 0; iter_jumlah_site < single_jumlah_site; iter_jumlah_site++) {
+                        var single_performa = 0
+                        try {
+                            single_performa = parseInt(document.getElementById(`${single_alldata['Kode_alat']}_${iter_jumlah}_${single_kode_sensor}_${iter_jumlah_site}_nilai_performa_kompleks`).value)
+                        } catch (err) {
+                            single_performa = 0
+                        }
+                        if (isNaN(single_performa)) {
+                            single_performa = 0
+                        }
+                        //single_performa = parseInt(document.getElementById(`${single_alldata['Kode_alat']}_${iter_jumlah}_${single_kode_sensor}_${iter_jumlah_site}_nilai_performa_kompleks`).value)
+                        list_performa_sensor.push(single_performa)
+                        //
+
+                        var single_keadaan = 'nil'
+                        try {
+                            single_keadaan = document.getElementById(`${single_alldata['Kode_alat']}_${iter_jumlah}_${single_kode_sensor}_${iter_jumlah_site}_keadaan_performa_kompleks`).value
+                        } catch (err) {
+                            single_keadaan = 'nil'
+                        }
+                        list_keadaan_sensor.push(single_keadaan)
+
+                        single_merk_sensor = document.getElementById(`${single_alldata['Kode_alat']}_${iter_jumlah}_${single_kode_sensor}_${iter_jumlah_site}_merk_performa_kompleks`).value
+                        list_merk_sensor.push(single_merk_sensor)
+                    }
+                    dict_sensor['performa'] = list_performa_sensor
+                    dict_sensor['keadaan'] = list_keadaan_sensor
+                    dict_sensor['merk'] = list_merk_sensor
+                    single_arr_dict_sensor.push(dict_sensor)
+                }
+                arr_dict_sensor.push(single_arr_dict_sensor)
+            }
+            data['performa'] = arr_dict_sensor
+
+
+            //final act
+            send_data['alat'].push(data)
+        }
+
+        //START FILLING JSON WITH ALAT TAMBAHAN
+        send_data['alat_tambahan'] = []
+        var cnt_tambahan = 0
+        for (var iter_tambahan = 0; iter_tambahan < real_count_tambah_alat+1; iter_tambahan++) {
+            var data = {}
+            try {
+                data['nama_alat'] = document.getElementById(`nama_tambah_alat_${iter_tambahan}`).value
+            } catch(err) {
+                continue
+            }
+            if (data['nama_alat'] == '') {
+                continue
+            }
+            try {
+                data['jumlah'] = parseInt(document.getElementById(`jumlah_tambah_alat_${iter_tambahan}`).value)
+            } catch(err) {
+                continue
+            }
+
+            var tidak_valid = false
+            data['merk'] = []
+            data['status'] = []
+            data['tahun_pengadaan'] = []
+            data['tahun_kalibrasi'] = []
+            data['keadaan'] = []
+            data['keterangan'] = []
+            data['performa'] = []
+            for (var iter_jumlah_tambahan = 0; iter_jumlah_tambahan < data['jumlah']; iter_jumlah_tambahan++) {
+                try {
+                    data['merk'].push(document.getElementById(`merk_tambah_alat_${iter_tambahan}_${iter_jumlah_tambahan}`).value)
+                } catch(err) {
+                    tidak_valid = true
+                    break
+                }
+                try {
+                    data['status'].push(document.getElementById(`status_tambah_alat_${iter_tambahan}_${iter_jumlah_tambahan}`).value)
+                } catch(err) {
+                    tidak_valid = true
+                    break
+                }
+                try {
+                    data['tahun_pengadaan'].push(parseInt(document.getElementById(`tahunpengadaan_tambah_alat_${iter_tambahan}_${iter_jumlah_tambahan}`).value))
+                } catch(err) {
+                    tidak_valid = true
+                    break
+                }
+                try {
+                    data['tahun_kalibrasi'].push(parseInt(document.getElementById(`tahunkalibrasi_tambah_alat_${iter_tambahan}_${iter_jumlah_tambahan}`).value))
+                } catch(err) {
+                    tidak_valid = true
+                    break
+                }
+                try {
+                    data['keadaan'].push(document.getElementById(`keadaan_tambah_alat_${iter_tambahan}_${iter_jumlah_tambahan}`).value)
+                } catch(err) {
+                    tidak_valid = true
+                    break
+                }
+                try {
+                    data['keterangan'].push(document.getElementById(`keterangan_tambah_alat_${iter_tambahan}_${iter_jumlah_tambahan}`).value)
+                } catch(err) {
+                    tidak_valid = true
+                    break
+                }
+                try {
+                    data['performa'].push(parseInt(document.getElementById(`performa_tambah_alat_${iter_tambahan}_${iter_jumlah_tambahan}`).value))
+                } catch(err) {
+                    tidak_valid = true
+                    break
+                }
+
+            }
+            if (tidak_valid) {
+                continue
+            }
+
+            send_data['alat_tambahan'].push(data)
+        }
+        //END FILLING JSON WITH ALAT TAMBAHAN
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "upload_data_alat", true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(JSON.stringify(send_data));
+        console.log('fire', send_data)
+    }
+</script>
+
+<script>
+
+
+function extract_data_historis_awos() {
+	var waktu_awal = document.getElementById("datepicker_awal_waktu").value
+	var waktu_akhir = document.getElementById("datepicker_akhir_waktu").value
+
+	var xhttp = new XMLHttpRequest();
+	xhttp.onreadystatechange = function() {
+		if (this.readyState == 4 && this.status == 200) {
+			var alldata = this.responseText
+			var alldata_json = JSON.parse(alldata);
+			
+			console.log(alldata_json)
+		}
+	};
+	xhttp.open("GET", "extract_data_historis_awos/"+waktu_awal+"/"+waktu_akhir, true);
+	xhttp.send();
+}
+
+</script>
+
+<script>
+
+    $( function() {
+        $( "#datepicker_awal_waktu" ).datepicker({dateFormat: 'dd-mm-yy'});
+    });
+        
+    $( function() {
+        $( "#datepicker_akhir_waktu" ).datepicker({dateFormat: 'dd-mm-yy'});
+    });
+    
+    </script>
+
+</body>
+</html>

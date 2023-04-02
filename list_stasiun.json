@@ -1,0 +1,905 @@
+[
+	{
+		"icao": "WAAA",
+		"stasiun": "Sultan Hasanuddin - Makassar",
+		"lat": "-5.06972222222222",
+		"lon": "119.568055555556",
+		"alt": "11.76"
+	},
+	{
+		"icao": "WABB",
+		"stasiun": "Frans Kaisiepo - Biak",
+		"lat": "-1.18916666666667",
+		"lon": "136.105833333333",
+		"alt": "12"
+	},
+	{
+		"icao": "WABI",
+		"stasiun": "Douw Aturure - Nabire",
+		"lat": "-3.37472222222222",
+		"lon": "135.501111111111",
+		"alt": "12.18"
+	},
+	{
+		"icao": "WABO",
+		"stasiun": "Stevanus Rumbewas - Serui",
+		"lat": "-1.81688888888889",
+		"lon": "136.066666666667",
+		"alt": "6.4"
+	},
+	{
+		"icao": "WADB",
+		"stasiun": "Sultan Muhammad Salahuddin - Bima",
+		"lat": "-8.54166666666667",
+		"lon": "118.691944444444",
+		"alt": "2.67"
+	},
+	{
+		"icao": "WADD",
+		"stasiun": "I Gusti Ngurah Rai - Denpasar",
+		"lat": "-8.74611111111111",
+		"lon": "115.165833333333",
+		"alt": "5"
+	},
+	{
+		"icao": "WADL",
+		"stasiun": "Bandara Internasional Lombok - Praya",
+		"lat": "-8.75805555555556",
+		"lon": "116.276388888889",
+		"alt": "13"
+	},
+	{
+		"icao": "WADS",
+		"stasiun": "Sultan Muhammad Kaharuddin - Sumbawa Besar",
+		"lat": "-8.48833333333333",
+		"lon": "117.411944444444",
+		"alt": "9"
+	},
+	{
+		"icao": "WADY",
+		"stasiun": "Banyuwangi",
+		"lat": "-8.31",
+		"lon": "114.340555555556",
+		"alt": "25.66"
+	},
+	{
+		"icao": "WAEE",
+		"stasiun": "Sultan Babullah - Ternate",
+		"lat": "0.832777777777778",
+		"lon": "127.379722222222",
+		"alt": "15"
+	},
+	{
+		"icao": "WAEG",
+		"stasiun": "Gamar Malamo - Galela",
+		"lat": "1.83833333333333",
+		"lon": "127.786944444444",
+		"alt": "55"
+	},
+	{
+		"icao": "WAEK",
+		"stasiun": "Kuabang Kao",
+		"lat": "1.20527777777778",
+		"lon": "127.899444444444",
+		"alt": "4"
+	},
+	{
+		"icao": "WAEL",
+		"stasiun": "Oesman Sadik - Labuha",
+		"lat": "0.644722222222222",
+		"lon": "127.497777777778",
+		"alt": "40.4"
+	},
+	{
+		"icao": "WAES",
+		"stasiun": "Emalamo - Sanana",
+		"lat": "-2.09805555555556",
+		"lon": "125.965833333333",
+		"alt": "7"
+	},
+	{
+		"icao": "WAEW",
+		"stasiun": "Pitu - Morotai",
+		"lat": "2.05",
+		"lon": "128.316666666667",
+		"alt": "26"
+	},
+	{
+		"icao": "WAFF",
+		"stasiun": "Mutiara SIS Al-Jufri - Palu",
+		"lat": "-0.9175",
+		"lon": "119.906944444444",
+		"alt": "86"
+	},
+	{
+		"icao": "WAFJ",
+		"stasiun": "Tampa Padang - Mamuju",
+		"lat": "-2.58777777777778",
+		"lon": "119.028333333333",
+		"alt": "6"
+	},
+	{
+		"icao": "WAFL",
+		"stasiun": "Sultan Bantilan - Toli Toli",
+		"lat": "1.12333333333333",
+		"lon": "120.792777777778",
+		"alt": "6"
+	},
+	{
+		"icao": "WAFM",
+		"stasiun": "Andi Jemma - Masamba",
+		"lat": "-2.55805555555556",
+		"lon": "120.323888888889",
+		"alt": "39"
+	},
+	{
+		"icao": "WAFP",
+		"stasiun": "Kasiguncu - Poso",
+		"lat": "-1.41888888888889",
+		"lon": "120.657777777778",
+		"alt": "9"
+	},
+	{
+		"icao": "WAFT",
+		"stasiun": "Pongtiku - Tana Toraja",
+		"lat": "-3.0425",
+		"lon": "119.819722222222",
+		"alt": "821"
+	},
+	{
+		"icao": "WAFW",
+		"stasiun": "Syukuran Aminuddin Amir - Luwuk",
+		"lat": "-1.04055555555556",
+		"lon": "122.770833333333",
+		"alt": "17"
+	},
+	{
+		"icao": "WAFY",
+		"stasiun": "Pogogul - Buol",
+		"lat": "1.10444444444444",
+		"lon": "121.415",
+		"alt": "74.63"
+	},
+	{
+		"icao": "WAGG",
+		"stasiun": "Tjilik Riwut - Palangkaraya",
+		"lat": "-2.22666666666667",
+		"lon": "113.943888888889",
+		"alt": "13"
+	},
+	{
+		"icao": "WAGI",
+		"stasiun": "Iskandar - Pangkalan Bun",
+		"lat": "-2.70416666666667",
+		"lon": "111.668888888889",
+		"alt": "26"
+	},
+	{
+		"icao": "WAGK",
+		"stasiun": "Beringin - Muara Teweh",
+		"lat": "0.943333333333333",
+		"lon": "114.894722222222",
+		"alt": "31"
+	},
+	{
+		"icao": "WAGM",
+		"stasiun": "Sanggu - Buntok",
+		"lat": "-1.66944444444444",
+		"lon": "114.898888888889",
+		"alt": "8"
+	},
+	{
+		"icao": "WAGS",
+		"stasiun": "Haji Asan - Sampit",
+		"lat": "-2.50111111111111",
+		"lon": "112.976944444444",
+		"alt": "11"
+	},
+	{
+		"icao": "WAHH",
+		"stasiun": "Adi Sutjipto - Yogyakarta",
+		"lat": "-7.78805555555556",
+		"lon": "110.431666666667",
+		"alt": "350"
+	},
+	{
+		"icao": "WAHI",
+		"stasiun": "Yogyakarta International Airport - Kulonprogo",
+		"lat": "-7.91722222222222",
+		"lon": "110.068055555556",
+		"alt": "unknown"
+	},
+	{
+		"icao": "WAHL",
+		"stasiun": "Tunggul Wulung - Cilacap",
+		"lat": "-7.64833333333333",
+		"lon": "109.055",
+		"alt": "19.61"
+	},
+	{
+		"icao": "WAHQ",
+		"stasiun": "Adi Soemarmo - Surakarta",
+		"lat": "-7.51361111111111",
+		"lon": "110.750555555556",
+		"alt": "106"
+	},
+	{
+		"icao": "WAHS",
+		"stasiun": "Ahmad Yani - Semarang",
+		"lat": "-6.97083333333333",
+		"lon": "110.373888888889",
+		"alt": "10"
+	},
+	{
+		"icao": "WAJI",
+		"stasiun": "Mararena / Orai - Sarmi",
+		"lat": "-1.84972222222222",
+		"lon": "138.75",
+		"alt": "3"
+	},
+	{
+		"icao": "WAJJ",
+		"stasiun": "Sentani - Jayapura",
+		"lat": "-2.57055555555556",
+		"lon": "140.512777777778",
+		"alt": "58"
+	},
+	{
+		"icao": "WAKK",
+		"stasiun": "Mopah - Merauke",
+		"lat": "-8.5175",
+		"lon": "140.416944444444",
+		"alt": "3"
+	},
+	{
+		"icao": "WAKT",
+		"stasiun": "Tanah Merah",
+		"lat": "-6.09666666666667",
+		"lon": "140.303888888889",
+		"alt": "24"
+	},
+	{
+		"icao": "WALL",
+		"stasiun": "Sultan Aji Muhammad Sulaiman - Sepinggan",
+		"lat": "-1.26694444444444",
+		"lon": "116.893888888889",
+		"alt": "4"
+	},
+	{
+		"icao": "WALS",
+		"stasiun": "Aji Pangeran Tumenggung Pranoto - Samarinda",
+		"lat": "-0.48444444444444",
+		"lon": "117.15694444444",
+		"alt": "3"
+	},
+	{
+		"icao": "WAMG",
+		"stasiun": "Djalaluddin - Gorontalo",
+		"lat": "0.636944444444444",
+		"lon": "122.848888888889",
+		"alt": "33"
+	},
+	{
+		"icao": "WAMH",
+		"stasiun": "Naha - Tahuna",
+		"lat": "3.68277777777778",
+		"lon": "125.527777777778",
+		"alt": "5"
+	},
+	{
+		"icao": "WAMM",
+		"stasiun": "Sam Ratulangi - Manado",
+		"lat": "1.54333333333333",
+		"lon": "124.921944444444",
+		"alt": "80"
+	},
+	{
+		"icao": "WAOK",
+		"stasiun": "Gusti Sjamsir Alam - Kota Baru",
+		"lat": "-3.29583333333333",
+		"lon": "116.163888888889",
+		"alt": "2"
+	},
+	{
+		"icao": "WAOO",
+		"stasiun": "Syamsudin Noor - Banjarmasin",
+		"lat": "-3.43944444444444",
+		"lon": "114.753888888889",
+		"alt": "20"
+	},
+	{
+		"icao": "WAPA",
+		"stasiun": "Amahai",
+		"lat": "-3.34694444444444",
+		"lon": "128.925833333333",
+		"alt": "7"
+	},
+	{
+		"icao": "WAPC",
+		"stasiun": "Bandaneira - Banda",
+		"lat": "-4.52166666666667",
+		"lon": "129.903888888889",
+		"alt": "19.9"
+	},
+	{
+		"icao": "WAPF",
+		"stasiun": "Karel Sadsuitubun - Tual",
+		"lat": "-5.76027777777778",
+		"lon": "132.759444444444",
+		"alt": "24.33"
+	},
+	{
+		"icao": "WAPI",
+		"stasiun": "Olilit - Saumlaki",
+		"lat": "-7.98833333333333",
+		"lon": "131.303888888889",
+		"alt": "57"
+	},
+	{
+		"icao": "WAPL",
+		"stasiun": "Dumatubun - Langgur",
+		"lat": "-5.66138888888889",
+		"lon": "132.731388888889",
+		"alt": "133"
+	},
+	{
+		"icao": "WAPP",
+		"stasiun": "Pattimura - Ambon",
+		"lat": "-3.70666666666667",
+		"lon": "128.088888888889",
+		"alt": "10"
+	},
+	{
+		"icao": "WAPR",
+		"stasiun": "Namniwel - Namlea",
+		"lat": "-3.23583333333333",
+		"lon": "127.099722222222",
+		"alt": "110"
+	},
+	{
+		"icao": "WAPS",
+		"stasiun": "Mathilda Batlayeri - Saumlaki",
+		"lat": "-7.98833333333333",
+		"lon": "131.304444444444",
+		"alt": "125"
+	},
+	{
+		"icao": "WAQA",
+		"stasiun": "Nunukan",
+		"lat": "4.13666666666667",
+		"lon": "117.665",
+		"alt": "17"
+	},
+	{
+		"icao": "WAQD",
+		"stasiun": "Tanjung Harapan - Tanjung Selor",
+		"lat": "2.83722222222222",
+		"lon": "117.373888888889",
+		"alt": "6"
+	},
+	{
+		"icao": "WAQJ",
+		"stasiun": "Yuvai Semaring - Long Bawang",
+		"lat": "3.88305555555556",
+		"lon": "115.7",
+		"alt": "762"
+	},
+	{
+		"icao": "WAQL",
+		"stasiun": "Long Apung",
+		"lat": "1.70444444444444",
+		"lon": "114.970277777778",
+		"alt": "732"
+	},
+	{
+		"icao": "WAQQ",
+		"stasiun": "Juwata - Tarakan",
+		"lat": "3.32666666666667",
+		"lon": "117.569722222222",
+		"alt": "6"
+	},
+	{
+		"icao": "WAQT",
+		"stasiun": "Kalimarau - Tanjung Redeb",
+		"lat": "2.155",
+		"lon": "117.432777777778",
+		"alt": "7"
+	},
+	{
+		"icao": "WARA",
+		"stasiun": "Abdulrachman Saleh - Malang",
+		"lat": "-7.92944444444445",
+		"lon": "112.711944444444",
+		"alt": "572"
+	},
+	{
+		"icao": "WARE",
+		"stasiun": "Noto Hadinegoro - Jember",
+		"lat": "-8.24",
+		"lon": "113.693611111111",
+		"alt": "87"
+	},
+	{
+		"icao": "WARI",
+		"stasiun": "Iswahjudi - Madiun",
+		"lat": "-7.63333333333333",
+		"lon": "111.433333333333",
+		"alt": "120"
+	},
+	{
+		"icao": "WARR",
+		"stasiun": "Juanda - Surabaya",
+		"lat": "-7.37722222222222",
+		"lon": "112.793888888889",
+		"alt": "3"
+	},
+	{
+		"icao": "WART",
+		"stasiun": "Trunojoyo - Sumenep",
+		"lat": "-7.02416666666667",
+		"lon": "113.89",
+		"alt": "3"
+	},
+	{
+		"icao": "WARW",
+		"stasiun": "Bawean - Harun Thohir",
+		"lat": "-5.71666666666667",
+		"lon": "112.666666666667",
+		"alt": "unknown"
+	},
+	{
+		"icao": "WASF",
+		"stasiun": "Torea - Fak Fak",
+		"lat": "-2.92027777777778",
+		"lon": "132.266944444444",
+		"alt": "125"
+	},
+	{
+		"icao": "WASK",
+		"stasiun": "Utarom - Kaimana",
+		"lat": "-3.64361111111111",
+		"lon": "133.695833333333",
+		"alt": "5"
+	},
+	{
+		"icao": "WASS",
+		"stasiun": "Domine Eduard Osok - Sorong",
+		"lat": "-0.893888888888889",
+		"lon": "131.285833333333",
+		"alt": "4"
+	},
+	{
+		"icao": "WATA",
+		"stasiun": "A.A. Bere Talo / Atambua",
+		"lat": "-9.07444444444444",
+		"lon": "124.904444444444",
+		"alt": "375"
+	},
+	{
+		"icao": "WATB",
+		"stasiun": "SOA - Bajawa",
+		"lat": "-8.72333333333333",
+		"lon": "121.053333333333",
+		"alt": "450"
+	},
+	{
+		"icao": "WATC",
+		"stasiun": "Fransiskus Xaverius Seda - Maumere",
+		"lat": "-8.63888888888889",
+		"lon": "122.238888888889",
+		"alt": "35"
+	},
+	{
+		"icao": "WATE",
+		"stasiun": "H. Hasan Aroeboesman - Ende",
+		"lat": "-8.84916666666667",
+		"lon": "121.660555555556",
+		"alt": "15"
+	},
+	{
+		"icao": "WATG",
+		"stasiun": "Frans Sales Lega - Ruteng",
+		"lat": "-8.59611111111111",
+		"lon": "120.477777777778",
+		"alt": "1143"
+	},
+	{
+		"icao": "WATK",
+		"stasiun": "Tambolaka - Sumba Barat",
+		"lat": "-9.40944444444444",
+		"lon": "119.244444444444",
+		"alt": "62"
+	},
+	{
+		"icao": "WATL",
+		"stasiun": "Gewayantana - Larantuka",
+		"lat": "-8.27416666666667",
+		"lon": "123",
+		"alt": "9"
+	},
+	{
+		"icao": "WATM",
+		"stasiun": "Mali - Alor",
+		"lat": "-8.13638888888889",
+		"lon": "124.593888888889",
+		"alt": "3"
+	},
+	{
+		"icao": "WATO",
+		"stasiun": "Komodo - Labuan Bajo",
+		"lat": "-8.48805555555555",
+		"lon": "119.888888888889",
+		"alt": "67"
+	},
+	{
+		"icao": "WATR",
+		"stasiun": "David Constantijn Saudale - Rote",
+		"lat": "-10.7669444444444",
+		"lon": "123.075",
+		"alt": "140"
+	},
+	{
+		"icao": "WATS",
+		"stasiun": "Tardamu - Sabu",
+		"lat": "-10.4927777777778",
+		"lon": "121.849722222222",
+		"alt": "20"
+	},
+	{
+		"icao": "WATT",
+		"stasiun": "El Tari - Kupang",
+		"lat": "-10.1713888888889",
+		"lon": "123.671944444444",
+		"alt": "103"
+	},
+	{
+		"icao": "WATU",
+		"stasiun": "Umbu Mehang Kunda - Waingapu",
+		"lat": "-9.66888888888889",
+		"lon": "120.298888888889",
+		"alt": "10"
+	},
+	{
+		"icao": "WATW",
+		"stasiun": "Wunopito - Lembata",
+		"lat": "-8.37666666666667",
+		"lon": "123.44",
+		"alt": "unknown"
+	},
+	{
+		"icao": "WAUU",
+		"stasiun": "Rendani - Manokwari",
+		"lat": "-0.893055555555555",
+		"lon": "134.05",
+		"alt": "5"
+	},
+	{
+		"icao": "WAVV",
+		"stasiun": "Wamena",
+		"lat": "-4.09527777777778",
+		"lon": "138.950833333333",
+		"alt": "1655"
+	},
+	{
+		"icao": "WAWB",
+		"stasiun": "Beto Ambari - Bau Bau",
+		"lat": "-5.48694444444444",
+		"lon": "122.568888888889",
+		"alt": "34"
+	},
+	{
+		"icao": "WAWP",
+		"stasiun": "Sangia Nibandera - Kolaka",
+		"lat": "-4.18083333333333",
+		"lon": "121.614722222222",
+		"alt": "24"
+	},
+	{
+		"icao": "WAWW",
+		"stasiun": "Haluoleo - Kendari",
+		"lat": "-4.08194444444444",
+		"lon": "122.416944444444",
+		"alt": "55"
+	},
+	{
+		"icao": "WAYE",
+		"stasiun": "Enarotali",
+		"lat": "-3.92555555555556",
+		"lon": "136.377777777778",
+		"alt": "1.75"
+	},
+	{
+		"icao": "WAYY",
+		"stasiun": "Mozes Kilangin - Timika",
+		"lat": "-4.5275",
+		"lon": "136.889722222222",
+		"alt": "103"
+	},
+	{
+		"icao": "WIBB",
+		"stasiun": "Sultan Syarif Kasim II - Pekanbaru",
+		"lat": "0.46",
+		"lon": "101.443888888889",
+		"alt": "37"
+	},
+	{
+		"icao": "WIBJ",
+		"stasiun": "Japura - Rengat",
+		"lat": "0.351944444444444",
+		"lon": "102.333888888889",
+		"alt": "19"
+	},
+	{
+		"icao": "WICA",
+		"stasiun": "Kertajati",
+		"lat": "-6.65194444444445",
+		"lon": "108.1575",
+		"alt": "38"
+	},
+	{
+		"icao": "WICC",
+		"stasiun": "Husein Sastranegara - Bandung",
+		"lat": "-6.90194444444445",
+		"lon": "107.576111111111",
+		"alt": "812"
+	},
+	{
+		"icao": "WICD",
+		"stasiun": "Cakrabhuwana / Penggung - Cirebon",
+		"lat": "-6.75666666666667",
+		"lon": "108.538888888889",
+		"alt": "27"
+	},
+	{
+		"icao": "WICM",
+		"stasiun": "Wiriadinata - Cibeureum",
+		"lat": "-7.33333333333333",
+		"lon": "108.25",
+		"alt": "383"
+	},
+	{
+		"icao": "WICS",
+		"stasiun": "Suryadarma - Kalijati",
+		"lat": "-6.53138888888889",
+		"lon": "107.658888888889",
+		"alt": "120"
+	},
+	{
+		"icao": "WIDD",
+		"stasiun": "Hang Nadim - Batam",
+		"lat": "1.12333333333333",
+		"lon": "104.114722222222",
+		"alt": "38"
+	},
+	{
+		"icao": "WIDN",
+		"stasiun": "Raja Haji Fisabilillah - Tanjung Pinang",
+		"lat": "0.921111111111111",
+		"lon": "104.530833333333",
+		"alt": "10"
+	},
+	{
+		"icao": "WIDO",
+		"stasiun": "Ranai - Natuna",
+		"lat": "3.91194444444444",
+		"lon": "108.393055555556",
+		"alt": "2"
+	},
+	{
+		"icao": "WIDS",
+		"stasiun": "Dabo - Singkep",
+		"lat": "-0.477998",
+		"lon": "104.577068",
+		"alt": "28"
+	},
+	{
+		"icao": "WIDT",
+		"stasiun": "Raja Haji Abdullah - Tanjung Balai Karimun",
+		"lat": "1.0525",
+		"lon": "103.391944444444",
+		"alt": "1"
+	},
+	{
+		"icao": "WIEE",
+		"stasiun": "Minangkabau International Airport - Padang",
+		"lat": "-0.788333333333333",
+		"lon": "100.280833333333",
+		"alt": "9"
+	},
+	{
+		"icao": "WIGG",
+		"stasiun": "Fatmawati Sukarno - Bengkulu",
+		"lat": "-3.86416666666667",
+		"lon": "102.34",
+		"alt": "22"
+	},
+	{
+		"icao": "WIGM",
+		"stasiun": "Mukomuko",
+		"lat": "-2.54222222222222",
+		"lon": "101.09",
+		"alt": "5"
+	},
+	{
+		"icao": "WIHH",
+		"stasiun": "Halim Perdana Kusuma - Jakarta",
+		"lat": "-6.2675",
+		"lon": "106.886388888889",
+		"alt": "28"
+	},
+	{
+		"icao": "WIHJ",
+		"stasiun": "Atang Sendjaja - Bogor",
+		"lat": "-6.54416666666667",
+		"lon": "106.753055555556",
+		"alt": "179"
+	},
+	{
+		"icao": "WIII",
+		"stasiun": "Soekarno Hatta - Jakarta",
+		"lat": "-6.12638888888889",
+		"lon": "106.653888888889",
+		"alt": "11"
+	},
+	{
+		"icao": "WIJI",
+		"stasiun": "Depati Parbo - Kerinci",
+		"lat": "-2.09388888888889",
+		"lon": "101.469722222222",
+		"alt": "791"
+	},
+	{
+		"icao": "WIJJ",
+		"stasiun": "Sultan Thaha - Jambi",
+		"lat": "-1.63611111111111",
+		"lon": "103.641944444444",
+		"alt": "27"
+	},
+	{
+		"icao": "WIKK",
+		"stasiun": "Depati Amir - Pangkal Pinang",
+		"lat": "-2.16305555555556",
+		"lon": "106.138888888889",
+		"alt": "33"
+	},
+	{
+		"icao": "WIKT",
+		"stasiun": "H.A.S. Hanandjoeddin - Tanjung Pandan",
+		"lat": "-2.75388888888889",
+		"lon": "107.752777777778",
+		"alt": "50"
+	},
+	{
+		"icao": "WILL",
+		"stasiun": "Radin Inten II - Lampung",
+		"lat": "-5.2425",
+		"lon": "105.175833333333",
+		"alt": "84"
+	},
+	{
+		"icao": "WILM",
+		"stasiun": "Astra Ksetra - Lampung",
+		"lat": "-4.6",
+		"lon": "105.25",
+		"alt": "21"
+	},
+	{
+		"icao": "WIMA",
+		"stasiun": "Malikus Saleh - Lhokseumawe",
+		"lat": "5.22583333333333",
+		"lon": "96.9486111111111",
+		"alt": "27"
+	},
+	{
+		"icao": "WIMB",
+		"stasiun": "Binaka - Gunung Sitoli",
+		"lat": "1.16638888888889",
+		"lon": "97.7044444444445",
+		"alt": "7"
+	},
+	{
+		"icao": "WIME",
+		"stasiun": "Aek Godang - Padang Sidempuan",
+		"lat": "1.39944444444444",
+		"lon": "99.4308333333333",
+		"alt": "286"
+	},
+	{
+		"icao": "WIMM",
+		"stasiun": "Kualanamu International Airport - Deli Serdang",
+		"lat": "3.64027777777778",
+		"lon": "98.8786111111111",
+		"alt": "7"
+	},
+	{
+		"icao": "WIMN",
+		"stasiun": "Silangit - Tapanuli Utara",
+		"lat": "2.25861111111111",
+		"lon": "98.9936111111111",
+		"alt": "1.416"
+	},
+	{
+		"icao": "WIMS",
+		"stasiun": "Dr. Ferdinand Lumban Tobing - Pinangsori (Sibolga)",
+		"lat": "1.55416666666667",
+		"lon": "98.8905555555556",
+		"alt": "11"
+	},
+	{
+		"icao": "WIOG",
+		"stasiun": "Nanga Pinoh",
+		"lat": "0.348611111111111",
+		"lon": "111.747777777778",
+		"alt": "38"
+	},
+	{
+		"icao": "WIOI",
+		"stasiun": "Singkawang II - Sanggau Ledo",
+		"lat": "0.899846",
+		"lon": "108.993545",
+		"alt": "18"
+	},
+	{
+		"icao": "WIOK",
+		"stasiun": "Rahadi Oesman - Ketapang",
+		"lat": "-1.81583333333333",
+		"lon": "109.962777777778",
+		"alt": "5"
+	},
+	{
+		"icao": "WIOO",
+		"stasiun": "Supadio - Pontianak",
+		"lat": "0.148888888888889",
+		"lon": "109.402777777778",
+		"alt": "3"
+	},
+	{
+		"icao": "WIOP",
+		"stasiun": "Pangsuma - Putussibau",
+		"lat": "0.835555555555556",
+		"lon": "112.935833333333",
+		"alt": "91"
+	},
+	{
+		"icao": "WIOS",
+		"stasiun": "Tebelian - Sintang",
+		"lat": "0.063611111111111",
+		"lon": "111.472777777778",
+		"alt": "28"
+	},
+	{
+		"icao": "WIPP",
+		"stasiun": "Sultan Mahmud Badaruddin II - Palembang",
+		"lat": "-2.89777777777778",
+		"lon": "104.700833333333",
+		"alt": "15"
+	},
+	{
+		"icao": "WIRR",
+		"stasiun": "Budiarto - Curug",
+		"lat": "-6.29083333333333",
+		"lon": "106.565833333333",
+		"alt": "42"
+	},
+	{
+		"icao": "WITC",
+		"stasiun": "Cut Nyak Dien Nagan Raya - Meulaboh",
+		"lat": "4.045",
+		"lon": "96.2494444444445",
+		"alt": "6"
+	},
+	{
+		"icao": "WITN",
+		"stasiun": "Maimun Saleh - Sabang",
+		"lat": "5.87666666666667",
+		"lon": "95.34",
+		"alt": "110"
+	},
+	{
+		"icao": "WITT",
+		"stasiun": "Sultan Iskandar Muda - Banda Aceh",
+		"lat": "5.52",
+		"lon": "95.4208333333333",
+		"alt": "23"
+	}
+]

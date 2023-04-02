@@ -1,0 +1,432 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        .grid-container {
+          display: grid;
+          grid-template: 150px / auto auto auto;
+          grid-gap: 10px;
+          background-color: #01091a;
+          padding: 10px;
+        }
+        
+        .grid-container > div {
+          background-color: rgba(0, 0, 0, 0.8);
+          text-align: center;
+          color: #ccc;
+          padding: 20px 0;
+          font-size: 30px;
+        }
+
+        .grid-container .not-active {
+          background-color: rgba(250, 7, 7, 0.8);
+        }
+        /* Style the tab */
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+        }
+
+        /* Style the buttons inside the tab */
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            font-size: 17px;
+        }
+
+        /* Change background color of buttons on hover */
+        .tab button:hover {
+            background-color: #ddd;
+        }
+
+        /* Create an active/current tablink class */
+        .tab button.active {
+            background-color: #ccc;
+        }
+
+        /* Style the tab content */
+        .tabcontent {
+            display: none;
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-top: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div>
+        <label>
+          Masukkan tanggal:
+          <input type="date" name="tanggal" id="tanggal" />
+        </label>
+        <p><button onclick="cekdata()">Cek</button></p>
+    </div>
+    
+    <!--TAB section start-->
+    <div class="tab">
+        <button class="tablinks" onclick="opentime(event, 'konten_0000')">00.00</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_0030')">00.30</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_0100')">01.00</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_0130')">01.30</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_0200')">02.00</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_0230')">02.30</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_0300')">03.00</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_0330')">03.30</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_0400')">04.00</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_0430')">04.30</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_0500')">05.00</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_0530')">05.30</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_0600')">06.00</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_0630')">06.30</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_0700')">07.00</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_0730')">07.30</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_0800')">08.00</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_0830')">08.30</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_0900')">09.00</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_0930')">09.30</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_1000')">10.00</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_1030')">10.30</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_1100')">11.00</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_1130')">11.30</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_1200')">12.00</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_1230')">12.30</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_1300')">13.00</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_1330')">13.30</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_1400')">14.00</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_1430')">14.30</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_1500')">15.00</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_1530')">15.30</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_1600')">16.00</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_1630')">16.30</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_1700')">17.00</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_1730')">17.30</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_1800')">18.00</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_1830')">18.30</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_1900')">19.00</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_1930')">19.30</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_2000')">20.00</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_2030')">20.30</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_2100')">21.00</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_2130')">21.30</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_2200')">22.00</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_2230')">22.30</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_2300')">23.00</button>
+        <button class="tablinks" onclick="opentime(event, 'konten_2330')">23.30</button>
+      </div>
+      
+      <div class="tabcontent" id="konten_0000">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_0030">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_0100">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_0130">
+        <div>
+            <div class="grid-container">
+
+            </div>
+        </div>
+      </div>
+      
+      <div class="tabcontent" id="konten_0200">
+        <div>
+            <div class="grid-container">
+                <!--<div class="not-active">1</div>
+                <div class="item2">2</div>
+                <div class="item3">3</div>  
+                <div class="item4">4</div>
+                <div class="item5">5</div>
+                <div class="item6">6</div>
+                <div class="item1">4</div>
+                <div class="item2">5</div>
+                <div class="item3">6</div>  
+                <div class="item4">7</div>
+                <div class="item5">0</div>
+                <div class="item6">00</div>
+                <div class="item1">1</div>
+                <div class="item2">2</div>
+                <div class="item3">3</div>  
+                <div class="item4">4</div>
+                <div class="item5">5</div>
+                <div class="item6">6</div>
+                <div class="item1">4</div>
+                <div class="item2">5</div>
+                <div class="item3">6</div>  
+                <div class="item4">7</div>
+                <div class="item5">0</div>
+                <div class="item6">00</div>-->
+            </div>
+        </div>
+      </div>
+
+      <div class="tabcontent" id="konten_0230">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_0300">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_0330">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_0400">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_0430">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_0500">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_0530">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_0600">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_0630">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_0700">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_0730">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_0800">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_0830">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_0900">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_0930">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_1000">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_1030">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_1100">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_1130">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_1200">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_1230">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_1300">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_1330">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_1400">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_1430">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_1500">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_1530">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_1600">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_1630">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_1700">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_1730">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_1800">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_1830">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_1900">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_1930">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_2000">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_2030">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_2100">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_2130">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_2200">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_2230">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_2300">
+        
+      </div>
+
+      <div class="tabcontent" id="konten_2330">
+        
+      </div>
+    <!-- TAB section end-->
+
+</body>
+<script>
+    function opentime(evt, cityName) {
+      var i, tabcontent, tablinks;
+      tabcontent = document.getElementsByClassName("tabcontent");
+      for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+      }
+      tablinks = document.getElementsByClassName("tablinks");
+      for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+      }
+      document.getElementById(cityName).style.display = "block";
+      evt.currentTarget.className += " active";
+    }
+</script>
+
+<script>
+    
+    var all_tab_name = []
+    for (let i = 0; i < 24; i++) {
+        if (i < 10) {
+            var stri = "0"+i
+        } else {
+            var stri = i
+        }
+        all_tab_name.push("konten_"+stri+"00")
+        all_tab_name.push("konten_"+stri+"30")
+    }
+    console.log("all tab name", all_tab_name)
+
+    function cekdata() {
+        let tanggal = document.getElementById('tanggal').value
+        var xhttp = new XMLHttpRequest();
+        console.log('cek input tanggal', tanggal)
+        xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                var alldata = this.responseText
+                var alldata_json = JSON.parse(alldata)
+                let status_data = alldata_json["status"]
+                if (status_data != "ok") {
+                    return
+                }
+                let all_stasiun = Object.keys(alldata_json["stasiun"])
+                let array = Array(48).fill().map(() => Array(all_stasiun.length).fill(0))
+                console.log(array)
+                console.log(alldata_json)
+                for (let iter_tab = 0; iter_tab < all_tab_name.length; iter_tab++) {
+                    let single_div_tab_konten = document.getElementById(all_tab_name[iter_tab])
+                    single_div_tab_konten.innerHTML = ""
+                    let div_outer = document.createElement("div")
+                    let div_inner = document.createElement("div")
+                    div_inner.className = "grid-container"
+                    for (let iter_stasiun = 0; iter_stasiun < all_stasiun.length; iter_stasiun++) {
+                        //check isi waktu
+                        single_waktuon = alldata_json["stasiun"][all_stasiun[iter_stasiun]]["WaktuOn"]
+                        let str_kode_waktu = []
+                        for (let iter_kode = 0; iter_kode < single_waktuon.length; iter_kode++) {
+                            single_waktuon_single = single_waktuon[iter_kode]
+                            single_waktuon_single = single_waktuon_single.replace(/:/g, '')
+                            single_waktuon_single = single_waktuon_single.replace(/-/g, '')
+                            single_kodeon = single_waktuon_single.substring(9, 13)
+                            str_kode_waktu.push(single_kodeon)
+                        }
+                        let kode_search = all_tab_name[iter_tab].substring(7)
+                        let sign_search = str_kode_waktu.indexOf(kode_search)
+                        let div_member = document.createElement("div")
+                        div_member.innerHTML = all_stasiun[iter_stasiun]
+                        if (sign_search < 0) {
+                            div_member.className = "not-active"
+                        }
+                        div_inner.appendChild(div_member)
+                    }
+                    div_outer.appendChild(div_inner)
+                    single_div_tab_konten.appendChild(div_outer)
+                }
+            }
+        }
+        xhttp.open("GET", "get_data_date/"+tanggal, true);
+	    xhttp.send();
+    }
+</script>
+
+</html>
