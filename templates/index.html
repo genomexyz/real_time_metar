@@ -62,6 +62,9 @@
 </head>
 <body>
 
+    <div style="vertical-align: middle;text-align: center;">
+        <label id="waktu_now"></label>
+    </div>
     <div>
         <label>
           Masukkan tanggal:
@@ -72,6 +75,7 @@
     
     <!--TAB section start-->
     <div class="tab">
+        <button class="tablinks" style="background-color: rgb(250, 190, 23);" onclick="opentime(event, 'konten_realtime')">Realtime</button>
         <button class="tablinks" onclick="opentime(event, 'konten_0000')">00.00</button>
         <button class="tablinks" onclick="opentime(event, 'konten_0030')">00.30</button>
         <button class="tablinks" onclick="opentime(event, 'konten_0100')">01.00</button>
@@ -120,6 +124,10 @@
         <button class="tablinks" onclick="opentime(event, 'konten_2230')">22.30</button>
         <button class="tablinks" onclick="opentime(event, 'konten_2300')">23.00</button>
         <button class="tablinks" onclick="opentime(event, 'konten_2330')">23.30</button>
+      </div>
+
+      <div class="tabcontent" id="konten_realtime">
+        
       </div>
       
       <div class="tabcontent" id="konten_0000">
@@ -427,6 +435,30 @@
         xhttp.open("GET", "get_data_date/"+tanggal, true);
 	    xhttp.send();
     }
+</script>
+
+<script>
+    //here is the algorithm to serve real time data
+    function runCycle() {
+        //let now = new Date()
+        //let now = new Date(2018, 12, 19, 9, 30, 0, 0)
+        let now = new Date('2013-12-19 09:30:00')
+        let utcString = now.toUTCString()
+        document.getElementById("waktu_now").innerHTML = utcString
+        console.log(now.toISOString())
+        var xhttp = new XMLHttpRequest()
+        xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+
+            }
+        }
+        xhttp.open("GET", "get_data_date/"+utcString, true);
+	    xhttp.send();
+
+    }
+
+    runCycle()
+    //setInterval(runCycle, 1000)
 </script>
 
 </html>

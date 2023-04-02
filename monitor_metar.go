@@ -29,9 +29,10 @@ type spekStasiun struct {
 }
 
 type statStasiun struct {
-	Icao    string
-	Nama    string
-	WaktuOn []time.Time
+	Icao        string
+	Nama        string
+	WaktuOn     []time.Time
+	WaktuInsert []time.Time
 }
 
 type metarRaw struct {
@@ -39,6 +40,19 @@ type metarRaw struct {
 	Data_text    string
 	Insert_time  time.Time
 	Filling_time time.Time
+}
+
+func getAnticipatedTime(t time.Time) time.Time {
+	minute := t.Minute()
+	minuteAnticipated := 30
+	if minute < 10 {
+		minuteAnticipated = 0
+		return t.Add(-time.Duration(minute) * time.Minute).Add(-time.Duration(t.Second()) * time.Second).Add(time.Duration(minuteAnticipated) * time.Minute)
+	} else if minute > 50 {
+		minuteAnticipated = 0
+		return t.Add(-time.Duration(minute) * time.Minute).Add(-time.Duration(t.Second()) * time.Second).Add(time.Duration(60) * time.Minute)
+	}
+	return t.Add(-time.Duration(minute) * time.Minute).Add(-time.Duration(t.Second()) * time.Second).Add(time.Duration(minuteAnticipated) * time.Minute)
 }
 
 //bson.M adalah alias dari map["string"] interface{}
@@ -66,8 +80,8 @@ func setupRouter() *gin.Engine {
 		log.Fatal(err)
 	}
 
-	//mysql_str := fmt.Sprintf("genomexyz:reyditya@tcp(%s)/%s?parseTime=true", "127.0.0.1", "raw_data")
-	mysql_str := fmt.Sprintf("netadmin:r00tBMKG@!)&@tcp(%s)/%s?parseTime=true", "172.19.2.98", "raw_data")
+	mysql_str := fmt.Sprintf("genomexyz:reyditya@tcp(%s)/%s?parseTime=true", "127.0.0.1", "raw_data")
+	//mysql_str := fmt.Sprintf("netadmin:r00tBMKG@!)&@tcp(%s)/%s?parseTime=true", "172.19.2.98", "raw_data")
 	db, err := sql.Open("mysql", mysql_str)
 	// if there is an error opening the connection, handle it
 	if err != nil {
@@ -82,6 +96,84 @@ func setupRouter() *gin.Engine {
 
 	r.GET("/index", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.html", nil)
+	})
+
+	r.GET("/get_data_date_detail/:date", func(c *gin.Context) {
+		tanggal := c.Param("date")
+		val := bson.M{}
+		tanggal_time, err := time.Parse(time.RFC3339, tanggal)
+		if err != nil {
+			fmt.Println(err)
+			val["status"] = "err"
+			c.JSON(200, val)
+			return
+		}
+		tanggal_time_anticipated := getAnticipatedTime(tanggal_time)
+		fmt.Println("cek anticipated time", tanggal_time_anticipated)
+
+		all_statstasiun := make(map[string]*statStasiun)
+		check_stasiun := make(map[string]bool)
+		for iter_stasiun := range all_stasiun {
+			single_stasiun_icao := all_stasiun[iter_stasiun].Icao
+			single_stasiun_nama := all_stasiun[iter_stasiun].Stasiun
+			var single_statstasiun statStasiun
+			single_statstasiun.Icao = single_stasiun_icao
+			single_statstasiun.Nama = single_stasiun_nama
+			single_statstasiun.WaktuOn = make([]time.Time, 0)
+			single_statstasiun.WaktuInsert = make([]time.Time, 0)
+			check_stasiun[single_stasiun_icao] = true
+			all_statstasiun[single_stasiun_icao] = &single_statstasiun
+		}
+		val["stasiun"] = all_statstasiun
+
+		stmt, err := db.Prepare("select centre_code, data_text, insert_time, filling_time from metar_speci where filling_time = ? and type_code = ?")
+		if err != nil {
+			fmt.Println(err)
+			val["status"] = "err"
+			c.JSON(200, val)
+			return
+		}
+		defer stmt.Close()
+
+		rows, err := stmt.Query(tanggal_time_anticipated, "SA")
+		if err != nil {
+			fmt.Println(err)
+			val["status"] = "err"
+			c.JSON(200, val)
+			return
+		}
+		defer rows.Close()
+
+		// Iterate over the results
+		for rows.Next() {
+			var centre_code, data_text string
+			var fill_time, insert_time time.Time
+			err := rows.Scan(&centre_code, &data_text, &insert_time, &fill_time)
+			if err != nil {
+				fmt.Println(err)
+				val["status"] = "err"
+				c.JSON(200, val)
+				return
+			}
+			if !check_stasiun[centre_code] {
+				continue
+			}
+			val["stasiun"].(map[string]*statStasiun)[centre_code].WaktuOn = append(val["stasiun"].(map[string]*statStasiun)[centre_code].WaktuOn, fill_time)
+			val["stasiun"].(map[string]*statStasiun)[centre_code].WaktuInsert = append(val["stasiun"].(map[string]*statStasiun)[centre_code].WaktuInsert, insert_time)
+			fmt.Println(centre_code, data_text, insert_time, fill_time)
+		}
+		fmt.Println(val)
+		err = rows.Err()
+		if err != nil {
+			fmt.Println(err)
+			val["status"] = "err"
+			c.JSON(200, val)
+			return
+		}
+
+		val["status"] = "ok"
+		c.JSON(200, val)
+		return
 	})
 
 	r.GET("/get_data_date/:date", func(c *gin.Context) {
@@ -155,6 +247,7 @@ func setupRouter() *gin.Engine {
 				continue
 			}
 			val["stasiun"].(map[string]*statStasiun)[centre_code].WaktuOn = append(val["stasiun"].(map[string]*statStasiun)[centre_code].WaktuOn, fill_time)
+			val["stasiun"].(map[string]*statStasiun)[centre_code].WaktuInsert = append(val["stasiun"].(map[string]*statStasiun)[centre_code].WaktuInsert, insert_time)
 			fmt.Println(centre_code, data_text, insert_time, fill_time)
 		}
 		fmt.Println(val)
