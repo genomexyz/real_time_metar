@@ -441,7 +441,6 @@
     //here is the algorithm to serve real time data
     function runCycle() {
         //let now = new Date()
-        //let now = new Date(2018, 12, 19, 9, 30, 0, 0)
         let now = new Date('2013-12-19 09:30:00')
         let utcString = now.toUTCString()
         document.getElementById("waktu_now").innerHTML = utcString
@@ -456,8 +455,10 @@
                     return
                 }
                 let all_stasiun = Object.keys(alldata_json["stasiun"])
+                let single_div_tab_konten = document.getElementById('konten_realtime')
+                single_div_tab_konten.innerHTML = ""
                 for (let iter_stasiun = 0; iter_stasiun < all_stasiun.length; iter_stasiun++) {
-
+                    single_waktuon = alldata_json["stasiun"][all_stasiun[iter_stasiun]]["WaktuOn"]
                 }
             }
         }
