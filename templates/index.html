@@ -22,6 +22,39 @@
         .grid-container .not-active {
           background-color: rgba(250, 7, 7, 0.8);
         }
+
+        .grid-container .little-late {
+          background-color: rgba(255, 217, 0, 0.904);
+        }
+        
+        .grid-container .late {
+          background-color: rgba(255, 145, 0, 0.904);
+        }
+
+        .grid-container .ontime {
+          background-color: rgba(0, 255, 0, 0.904);
+        }
+
+        .grid-container .toosoon {
+          background-color: rgba(119, 71, 0, 0.904);
+        }
+
+        .grid-container .empty {
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0% {
+                background-color: yellow;
+            }
+            50% {
+                background-color: transparent;
+            }
+            100% {
+                background-color: yellow;
+            }
+        }
+
         /* Style the tab */
         .tab {
             overflow: hidden;
@@ -58,6 +91,55 @@
             border: 1px solid #ccc;
             border-top: none;
         }
+
+        .legend-ontime {
+            width: 10px;
+            height: 10px;
+            background-color: rgba(0, 255, 0, 0.904); /* Replace with your desired color */
+            display: inline-block;
+            margin-right: 5px; /* Add some space between the square and the legend text */
+        }
+
+        .legend-little-late {
+            width: 10px;
+            height: 10px;
+            background-color: rgba(255, 217, 0, 0.904); /* Replace with your desired color */
+            display: inline-block;
+            margin-right: 5px; /* Add some space between the square and the legend text */
+        }
+
+        .legend-toosoon {
+            width: 10px;
+            height: 10px;
+            background-color: rgba(119, 71, 0, 0.904); /* Replace with your desired color */
+            display: inline-block;
+            margin-right: 5px; /* Add some space between the square and the legend text */
+        }
+
+        .legend-late {
+            width: 10px;
+            height: 10px;
+            background-color: rgba(255, 145, 0, 0.904); /* Replace with your desired color */
+            display: inline-block;
+            margin-right: 5px; /* Add some space between the square and the legend text */
+        }
+
+        .legend-not-active {
+            width: 10px;
+            height: 10px;
+            background-color: rgba(250, 7, 7, 0.8); /* Replace with your desired color */
+            display: inline-block;
+            margin-right: 5px; /* Add some space between the square and the legend text */
+        }
+
+        .legend-empty {
+            width: 10px;
+            height: 10px;
+            animation: blink 1s infinite; /* Replace with your desired color */
+            display: inline-block;
+            margin-right: 5px; /* Add some space between the square and the legend text */
+        }
+
     </style>
 </head>
 <body>
@@ -71,6 +153,24 @@
           <input type="date" name="tanggal" id="tanggal" />
         </label>
         <p><button onclick="cekdata()">Cek</button></p>
+    </div>
+    <div>
+        <span class="legend-ontime"></span> Ontime (-5 menit)
+    </div>
+    <div>
+        <span class="legend-little-late"></span> Hampir Ontime (0 - +5 menit)
+    </div>
+    <div>
+        <span class="legend-toosoon"></span> Terlalu awal (<-5 menit)
+    </div>
+    <div>
+        <span class="legend-late"></span> Telat (> +5 menit)
+    </div>
+    <div>
+        <span class="legend-not-active"></span> Tidak kirim
+    </div>
+    <div>
+        <span class="legend-empty"></span> Masih menunggu pengiriman data
     </div>
     
     <!--TAB section start-->
@@ -369,10 +469,25 @@
       document.getElementById(cityName).style.display = "block";
       evt.currentTarget.className += " active";
     }
+
+    function opentime_realtime() {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+          tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+          tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById('konten_realtime').style.display = "block";
+        document.getElementById('konten_realtime').className += " active";
+    }
 </script>
 
 <script>
     
+    var threshold_time = 5 * 60
     var all_tab_name = []
     for (let i = 0; i < 24; i++) {
         if (i < 10) {
@@ -398,9 +513,6 @@
                     return
                 }
                 let all_stasiun = Object.keys(alldata_json["stasiun"])
-                let array = Array(48).fill().map(() => Array(all_stasiun.length).fill(0))
-                console.log(array)
-                console.log(alldata_json)
                 for (let iter_tab = 0; iter_tab < all_tab_name.length; iter_tab++) {
                     let single_div_tab_konten = document.getElementById(all_tab_name[iter_tab])
                     single_div_tab_konten.innerHTML = ""
@@ -410,8 +522,21 @@
                     for (let iter_stasiun = 0; iter_stasiun < all_stasiun.length; iter_stasiun++) {
                         //check isi waktu
                         single_waktuon = alldata_json["stasiun"][all_stasiun[iter_stasiun]]["WaktuOn"]
+                        single_waktuinsert = alldata_json["stasiun"][all_stasiun[iter_stasiun]]["WaktuInsert"]
                         let str_kode_waktu = []
+                        let all_selisih_waktu = []
                         for (let iter_kode = 0; iter_kode < single_waktuon.length; iter_kode++) {
+                            let date_insert = new Date(single_waktuinsert[0])
+                            let date_on = new Date(single_waktuon[0])
+                            let dif_time_seconds = (date_insert - date_on) / 1000
+                            //compensate for cmss
+                            if (dif_time_seconds > threshold_time) {
+                                dif_time_seconds -= threshold_time
+                            } else if (dif_time_seconds < threshold_time && dif_time_seconds > 0) {
+                                dif_time_seconds -= 3*60
+                            }
+                            all_selisih_waktu.push(dif_time_seconds)
+                            
                             single_waktuon_single = single_waktuon[iter_kode]
                             single_waktuon_single = single_waktuon_single.replace(/:/g, '')
                             single_waktuon_single = single_waktuon_single.replace(/-/g, '')
@@ -424,7 +549,20 @@
                         div_member.innerHTML = all_stasiun[iter_stasiun]
                         if (sign_search < 0) {
                             div_member.className = "not-active"
+                        } else if (all_selisih_waktu[sign_search] < threshold_time && all_selisih_waktu[sign_search] > 0) {
+                            div_member.className = "little-late"
+                        } else if (all_selisih_waktu[sign_search] > -threshold_time) {
+                            div_member.className = "ontime"
+                        } else if (all_selisih_waktu[sign_search] < -threshold_time) {
+                            div_member.className = "toosoon"
+                        } else if (all_selisih_waktu[sign_search] > threshold_time) {
+                            div_member.className = "late"
                         }
+
+                        //include station name
+                        let div_name = document.createElement('div')
+                        div_name.innerHTML = alldata_json["stasiun"][all_stasiun[iter_stasiun]]["Nama"]
+                        div_member.appendChild(div_name)
                         div_inner.appendChild(div_member)
                     }
                     div_outer.appendChild(div_inner)
@@ -439,12 +577,14 @@
 
 <script>
     //here is the algorithm to serve real time data
+    var threshold_time = 5 * 60
+    opentime_realtime()
     function runCycle() {
-        //let now = new Date()
-        let now = new Date('2013-12-19 09:30:00')
+        let now = new Date()
+        //let now = new Date('2013-12-19 09:30:00 UTC')
         let utcString = now.toUTCString()
         document.getElementById("waktu_now").innerHTML = utcString
-        console.log(now.toISOString())
+        //console.log(now.toISOString())
         var xhttp = new XMLHttpRequest()
         xhttp.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
@@ -457,12 +597,74 @@
                 let all_stasiun = Object.keys(alldata_json["stasiun"])
                 let single_div_tab_konten = document.getElementById('konten_realtime')
                 single_div_tab_konten.innerHTML = ""
+                let div_outer = document.createElement("div")
+                let div_inner = document.createElement("div")
+                div_inner.className = "grid-container"
                 for (let iter_stasiun = 0; iter_stasiun < all_stasiun.length; iter_stasiun++) {
                     single_waktuon = alldata_json["stasiun"][all_stasiun[iter_stasiun]]["WaktuOn"]
+                    single_waktuinsert = alldata_json["stasiun"][all_stasiun[iter_stasiun]]["WaktuInsert"]
+                    let div_member = document.createElement("div")
+                    div_member.innerHTML = all_stasiun[iter_stasiun]
+                    if (single_waktuon.length == 0 || single_waktuinsert.length == 0) {
+                        let minute_now = now.getMinutes()
+                        if (minute_now > 50 || minute_now <= 20) {
+                            div_member.className = "empty"
+                        } else if (minute_now > 20 && minute_now < 50) {
+                            div_member.className = "empty"
+                        } else {
+                            div_member.className = "not-active"
+                        }
+                    } else {
+                        let date_insert = new Date(single_waktuinsert[0])
+                        let date_on = new Date(single_waktuon[0])
+                        let dif_time_seconds = (date_insert - date_on) / 1000
+
+                        //compensate for cmss
+                        if (dif_time_seconds > threshold_time) {
+                            dif_time_seconds -= threshold_time
+                        } else if (dif_time_seconds < threshold_time && dif_time_seconds > 0) {
+                            dif_time_seconds -= 3*60
+                        }
+                        
+                        if (dif_time_seconds < -threshold_time) {
+                            dif_time_seconds += threshold_time
+                        }
+
+                        if (dif_time_seconds > 0 && dif_time_seconds < threshold_time) {
+                            div_member.className = "little-late"
+                        } else if (dif_time_seconds < 0 && dif_time_seconds > -threshold_time) {
+                            div_member.className = "ontime"
+                        } else if (dif_time_seconds < -threshold_time) {
+                            div_member.className = "toosoon"
+                        } else if (dif_time_seconds > threshold_time) {
+                            div_member.className = "late"
+                        }
+                    }
+                    //include station name
+                    let div_name = document.createElement('div')
+                    div_name.innerHTML = alldata_json["stasiun"][all_stasiun[iter_stasiun]]["Nama"]
+                    div_member.appendChild(div_name)
+                    div_inner.appendChild(div_member)
+                    
+                }
+                div_outer.appendChild(div_inner)
+                single_div_tab_konten.appendChild(div_outer)
+
+                //run again
+                let now_new = new Date()
+                //let now_new = new Date('2013-12-19 09:37:00 UTC')
+                let dif_now_new = (now_new - now) / 1000
+                if (dif_now_new < 5) {
+                    setTimeout(runCycle, (5 - dif_now_new) * 1000)
+                } else {
+                    //console.log('cek run', (5 - dif_now_new) * 1000, dif_now_new)
+                    //runCycle()
+                    setTimeout(runCycle, 5000)
                 }
             }
         }
-        xhttp.open("GET", "get_data_date/"+utcString, true);
+        let randnum = Math.floor(Math.random() * 1000000000);
+        xhttp.open("GET", "get_data_date_detail/"+now.toISOString()+"?rand="+randnum, true);
 	    xhttp.send();
 
     }

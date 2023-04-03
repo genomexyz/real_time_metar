@@ -45,14 +45,14 @@ type metarRaw struct {
 func getAnticipatedTime(t time.Time) time.Time {
 	minute := t.Minute()
 	minuteAnticipated := 30
-	if minute < 10 {
+	if minute < 20 {
 		minuteAnticipated = 0
-		return t.Add(-time.Duration(minute) * time.Minute).Add(-time.Duration(t.Second()) * time.Second).Add(time.Duration(minuteAnticipated) * time.Minute)
+		return t.Add(-time.Duration(minute) * time.Minute).Add(-time.Duration(t.Second()) * time.Second).Add(-time.Duration(t.Nanosecond()) * time.Nanosecond).Add(time.Duration(minuteAnticipated) * time.Minute)
 	} else if minute > 50 {
 		minuteAnticipated = 0
-		return t.Add(-time.Duration(minute) * time.Minute).Add(-time.Duration(t.Second()) * time.Second).Add(time.Duration(60) * time.Minute)
+		return t.Add(-time.Duration(minute) * time.Minute).Add(-time.Duration(t.Second()) * time.Second).Add(-time.Duration(t.Nanosecond()) * time.Nanosecond).Add(time.Duration(60) * time.Minute)
 	}
-	return t.Add(-time.Duration(minute) * time.Minute).Add(-time.Duration(t.Second()) * time.Second).Add(time.Duration(minuteAnticipated) * time.Minute)
+	return t.Add(-time.Duration(minute) * time.Minute).Add(-time.Duration(t.Second()) * time.Second).Add(-time.Duration(t.Nanosecond()) * time.Nanosecond).Add(time.Duration(minuteAnticipated) * time.Minute)
 }
 
 //bson.M adalah alias dari map["string"] interface{}
@@ -80,8 +80,8 @@ func setupRouter() *gin.Engine {
 		log.Fatal(err)
 	}
 
-	mysql_str := fmt.Sprintf("genomexyz:reyditya@tcp(%s)/%s?parseTime=true", "127.0.0.1", "raw_data")
-	//mysql_str := fmt.Sprintf("netadmin:r00tBMKG@!)&@tcp(%s)/%s?parseTime=true", "172.19.2.98", "raw_data")
+	//mysql_str := fmt.Sprintf("genomexyz:reyditya@tcp(%s)/%s?parseTime=true", "127.0.0.1", "raw_data")
+	mysql_str := fmt.Sprintf("netadmin:r00tBMKG@!)&@tcp(%s)/%s?parseTime=true", "172.19.2.98", "raw_data")
 	db, err := sql.Open("mysql", mysql_str)
 	// if there is an error opening the connection, handle it
 	if err != nil {
@@ -134,6 +134,7 @@ func setupRouter() *gin.Engine {
 			return
 		}
 		defer stmt.Close()
+		//fmt.Println("cek isi query")
 
 		rows, err := stmt.Query(tanggal_time_anticipated, "SA")
 		if err != nil {
@@ -160,9 +161,9 @@ func setupRouter() *gin.Engine {
 			}
 			val["stasiun"].(map[string]*statStasiun)[centre_code].WaktuOn = append(val["stasiun"].(map[string]*statStasiun)[centre_code].WaktuOn, fill_time)
 			val["stasiun"].(map[string]*statStasiun)[centre_code].WaktuInsert = append(val["stasiun"].(map[string]*statStasiun)[centre_code].WaktuInsert, insert_time)
-			fmt.Println(centre_code, data_text, insert_time, fill_time)
+			fmt.Println("cek isi row", centre_code, data_text, insert_time, fill_time)
 		}
-		fmt.Println(val)
+		//fmt.Println(val)
 		err = rows.Err()
 		if err != nil {
 			fmt.Println(err)
