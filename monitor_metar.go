@@ -80,8 +80,8 @@ func setupRouter() *gin.Engine {
 		log.Fatal(err)
 	}
 
-	//mysql_str := fmt.Sprintf("genomexyz:reyditya@tcp(%s)/%s?parseTime=true", "127.0.0.1", "raw_data")
-	mysql_str := fmt.Sprintf("netadmin:r00tBMKG@!)&@tcp(%s)/%s?parseTime=true", "172.19.2.98", "raw_data")
+	mysql_str := fmt.Sprintf("genomexyz:reyditya@tcp(%s)/%s?parseTime=true", "127.0.0.1", "raw_data")
+	//mysql_str := fmt.Sprintf("netadmin:r00tBMKG@!)&@tcp(%s)/%s?parseTime=true", "172.19.2.98", "raw_data")
 	db, err := sql.Open("mysql", mysql_str)
 	// if there is an error opening the connection, handle it
 	if err != nil {
@@ -95,7 +95,7 @@ func setupRouter() *gin.Engine {
 	})
 
 	r.GET("/index", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.html", nil)
+		c.HTML(http.StatusOK, "index2.html", nil)
 	})
 
 	r.GET("/get_data_date_detail/:date", func(c *gin.Context) {
